@@ -1,0 +1,293 @@
+---
+title: "Extended analysis of demographic table"
+format: html
+editor: visual
+---
+
+## Libraries
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+library(rstatix)
+library(ggpubr)
+library(gtsummary)
+library(stats)
+library(car)
+library(readxl)
+```
+
+### Data
+
+```{r}
+#| echo: false
+#| output: false
+CST_data <- read_csv("imputed_complete_data.csv")
+```
+
+Changing data types
+
+```{r}
+#| echo: false
+CST_final <- CST_data |>  mutate(Group = as.factor(Group),
+                                STEM = as.factor(STEM), 
+                                Sex =  as.factor(Sex))
+```
+
+Changing group order
+
+```{r}
+# Define the desired order of factor levels
+desired_order <- c("OC", "IUD", "NCF", "NCL", "Men")
+
+# Reorder the levels of the 'Group' factor variable
+CST_final$Group <- fct_relevel(CST_final$Group, desired_order)
+
+```
+
+### Comments on data set
+
+Some women were excluded from data analysis before hand. These were:
+
+-   9 OC women due to usage of androgenic OC (Subject numbers: 2, 3, 4, 6, 7, 10, 17, 19, 26) (apie šitas straipsnį nerašom);
+-   3 NCF women due to high values of progesterone (\> 150) and estradiol (\> 3), which signaled that they might be in different cycle phase than we expected (Subject numeber: (202, 210, 233)).
+-   9 NCL women due to low values of progesterone (\< 87) showing that corpus luteal is not active.
+-   1 (2 - gal dvi rašyti, nes vienai bloga buvo) IUD due to very low performance (6%, 2 correct of 30). Communication after task revealed that participant did not understood the task.
+
+```{r}
+
+Demographic_data <- CST_final |> dplyr::select(-Subject, -Sex, -CST, -anxiety)
+
+demographic_summary_1 <- Demographic_data |>
+  tbl_summary(
+    by = Group,
+    missing = "no",
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})"
+    )
+  ) |>
+  add_p(
+    test = all_continuous() ~ "aov",
+    pvalue_fun = function(x) style_pvalue(x, digits = 2)
+  )
+
+demographic_summary_1
+```
+
+#### Age
+
+```{r}
+res.aov <- CST_final |>  anova_test(Age ~ Group)
+res.aov
+```
+
+```{r}
+pwc <- CST_final |> 
+  emmeans_test(
+    Age ~ Group,
+    p.adjust.method = "bonferroni"
+    )
+pwc
+```
+
+#### STEM
+
+```{r}
+STEM <- table(CST_final$STEM, CST_final$Group)
+```
+
+```{r}
+chisq_test(STEM)
+```
+
+```{r}
+pairwise_chisq_gof_test(STEM,p.adjust.method = "none")
+```
+
+#### PANAS
+
+```{r}
+res.aov2 <- CST_final |>  anova_test(PANAS_PA ~ Group)
+res.aov2
+```
+
+```{r}
+res.aov3 <- CST_final |>  anova_test(PANAS_NA ~ Group)
+res.aov3
+```
+
+#### GERAS
+
+```{r}
+res.aov4 <- CST_final |>  anova_test(Femininity ~ Group)
+res.aov4
+```
+
+```{r}
+CST_final |> 
+  emmeans_test(
+    Femininity ~ Group,
+    p.adjust.method = "bonferroni"
+    )
+```
+
+```{r}
+CST_final |>  anova_test(Masculinity ~ Group)
+```
+
+```{r}
+CST_final |> 
+  emmeans_test(
+    Masculinity ~ Group,
+    p.adjust.method = "bonferroni"
+    )
+```
+
+#### EA and tiredness
+
+```{r}
+CST_final |>  anova_test(Tiredness_1 ~ Group)
+```
+
+```{r}
+CST_final |>  anova_test(EA1 ~ Group)
+```
+
+```{r}
+CST_final |>  anova_test(Tiredness_2 ~ Group)
+```
+
+```{r}
+CST_final |>  anova_test(EA2 ~ Group)
+```
+
+#### RM-ANOVA: Analysis of EA and tiredness
+
+Filtrate just necessary data table
+
+```{r}
+RM_data <- CST_final |> dplyr::select(Subject, Group, EA1, EA2, Tiredness_1, Tiredness_2)
+```
+
+```{r}
+RM_data_long <- RM_data %>%
+  gather(key = "time", value = "score", EA1, EA2) |> 
+  convert_as_factor(Subject, Group, time)
+
+```
+
+```{r}
+res.aov5 <- anova_test(
+  data = RM_data_long, dv = score, wid = Subject,
+  between = Group, within = time
+  )
+get_anova_table(res.aov5)
+```
+
+```{r}
+RM_data_long2 <- RM_data %>%
+  gather(key = "time", value = "score", Tiredness_1, Tiredness_2) |> 
+  convert_as_factor(Subject, Group, time)
+
+```
+
+```{r}
+res.aov6 <- anova_test(
+  data = RM_data_long2, dv = score, wid = Subject,
+  between = Group, within = time
+  )
+get_anova_table(res.aov6)
+```
+
+#### Sex hormones
+
+Testosterone
+
+```{r}
+CST_final |>  anova_test(Tes ~ Group)
+```
+
+```{r}
+CST_final %>%
+  emmeans_test(
+    formula = Tes ~ Group,
+    p.adjust.method = "bonferroni"
+  )
+```
+
+Upload just women
+
+```{r}
+write_csv(women_data, "women_data.csv")
+```
+
+```{r}
+women <- read_csv("women_data.csv") |> mutate(Group = as.factor(Group))
+```
+
+Estradiol
+
+```{r}
+women |>  anova_test(E2 ~ Group)
+```
+
+```{r}
+women |>  anova_test(P4 ~ Group)
+```
+
+```{r}
+women %>%
+  emmeans_test(
+    formula = P4 ~ Group,
+    p.adjust.method = "bonferroni"
+  )
+```
+
+```{r}
+women |>  anova_test(Tes ~ Group)
+```
+
+```{r}
+women %>%
+  emmeans_test(
+    formula = Tes ~ Group,
+    p.adjust.method = "bonferroni"
+  )
+```
+
+#### Upload information about cycle, usage of HC
+
+```{r}
+cycle_info <- read_excel("Information about HC usage cycle day.xlsx")
+```
+
+##### Combining data tables
+
+```{r}
+women_cycle <- women |> left_join(cycle_info, by = "Subject")
+```
+
+#### Subseting group calculating correlation
+
+```{r}
+women_cycle |> 
+  filter(Group == "OC"| Group == "IUD") |> 
+  group_by(Group) |> 
+  cor_test(
+    vars = "HC_usage_length",
+    vars2 = c("E2", "P4", "Tes")
+ )
+```
+
+```{r}
+write_csv(women_cycle, "women_data.csv")
+```
+
+## Vidurkiai pritrūkusių skaičiukų
+
+```{r}
+CST_final |> 
+  group_by(Group) |> 
+  get_summary_stats(PANAS_PA, PANAS_NA, P4,Tes, type = "mean_sd")
+```
