@@ -1,0 +1,181 @@
+---
+title: "Full_CST_analysis"
+author: "R. Gaizauskaite"
+format: html
+editor: visual
+---
+
+## Preparation for analysis
+
+### Libraries
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+library(rstatix)
+library(ggpubr)
+```
+
+### Load data
+
+```{r}
+combined_full <- read_csv("Full_CST_analysis/combined_full.csv")
+```
+
+```{r}
+glimpse(combined_full)
+```
+
+### Selecting variables
+
+```{r}
+full_parameters <- dplyr::select(combined_full, Subject, Age, Group, STEM, Orthogon_CorrectSimple, Orthogon_CorrectJoint, Orthogon_CorrectEmbed, Oblique_CorrectSimple, Oblique_CorrectJoint, Oblique_CorrectEmbed)
+
+```
+
+### Changing data types
+
+```{r}
+#| echo: false
+full_parameters <- full_parameters |> mutate(
+  Group = as.factor(Group),
+  STEM = as.factor(STEM)
+)
+```
+
+### Long format
+
+```{r}
+full_parameters_long <- full_parameters |> 
+  gather(key = "conditions", value = "score", Orthogon_CorrectSimple, Orthogon_CorrectJoint, Orthogon_CorrectEmbed, Oblique_CorrectSimple, Oblique_CorrectJoint, Oblique_CorrectEmbed) |> 
+  convert_as_factor(Subject, conditions)
+```
+
+```{r}
+glimpse(full_parameters_long)
+```
+
+```{r}
+
+full_parameters_long <- separate(full_parameters_long, col = "conditions", into = c("plane", "figure"), sep = "_", convert = TRUE) 
+full_parameters_long <- full_parameters_long |> convert_as_factor(plane, figure)
+```
+
+### Summary statistics
+
+```{r}
+full_parameters_long %>%
+  group_by(plane,figure) %>%
+  get_summary_stats(score, type = "mean_sd")
+```
+
+### Identify outliers 
+
+```{r}
+full_parameters_long %>%
+  group_by(plane, figure, Group) %>%
+  identify_outliers(score)
+```
+
+No extreme outliers
+
+### Normality
+
+```{r}
+full_parameters_long %>%
+  group_by(plane, figure, Group) %>%
+  shapiro_test(score)
+```
+
+```{r}
+ggqqplot(full_parameters_long, "score", ggtheme = theme_bw()) +
+  facet_grid(plane ~ figure)
+```
+
+Niekas niekur normaliai nepasiskirstę, bet pagal QQ nėra taip blogai
+
+### **Homogneity of variance assumption**
+
+```{r}
+full_parameters_long %>%
+  group_by(plane, figure) %>%
+  levene_test(score ~ Group)
+```
+
+Homogeniškumo prielaida nepažeista
+
+```{r}
+res.aov <- anova_test(
+  data = full_parameters_long, dv = score, wid = Subject,
+  between = c(Group, STEM), within = c(plane, figure), covariate = Age
+  )
+get_anova_table(res.aov)
+```
+
+```{r}
+ggplot(full_parameters_long, aes(Age, score)) +
+  geom_point() +
+  geom_smooth(method = "lm")+
+  facet_grid(plane ~ figure)
+```
+
+```{r}
+res.aov <- anova_test(
+  data = full_parameters_long, dv = score, wid = Subject,
+  between = c(Group, STEM), within = c(plane, figure)
+  )
+get_anova_table(res.aov)
+```
+
+```{r}
+one.way <- full_parameters_long |> 
+  group_by(plane)  |> 
+  anova_test(dv = score, wid = Subject, within = figure)  |> 
+  get_anova_table()  |> 
+  adjust_pvalue(method = "bonferroni")
+one.way
+```
+
+```{r}
+pwc <- full_parameters_long  |> 
+  group_by(plane)  |> 
+  pairwise_t_test(
+    score ~ figure, paired = TRUE,
+    p.adjust.method = "bonferroni"
+    )
+pwc
+```
+
+```{r}
+one.way2 <- full_parameters_long |> 
+  group_by(figure)  |> 
+  anova_test(dv = score, wid = Subject, within = plane)  |> 
+  get_anova_table()  |> 
+  adjust_pvalue(method = "bonferroni")
+one.way2
+```
+
+```{r}
+pwc2 <- full_parameters_long  |> 
+  group_by(figure)  |> 
+  pairwise_t_test(
+    score ~ plane, paired = TRUE,
+    p.adjust.method = "bonferroni"
+    )
+pwc2
+```
+
+
+
+```{r}
+pwc3 <- full_parameters_long %>%
+  group_by(plane) %>%
+  pairwise_t_test(
+    score ~ STEM, paired = FALSE, 
+    p.adjust.method = "bonferroni") 
+pwc3
+```
+
+
+
