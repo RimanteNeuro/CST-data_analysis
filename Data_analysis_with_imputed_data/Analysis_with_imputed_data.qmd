@@ -1,0 +1,416 @@
+---
+title: Main analysis with imputed values
+author: R. Gaizauskaite
+format: 
+  html:
+    toc: true
+    embed-resources: true
+---
+
+### Libraries
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+library(rstatix)
+library(gtsummary)
+library(lmtest)
+library(ggpubr)
+library(car)
+library(MASS)
+library(nortest)
+```
+
+```{r}
+#| echo: false
+combined_full <- read_csv("C:/Users/Rokas/Desktop/Mantes dokumentai/Dok. reikalingi failai/Skerspjūvio analizė/final_final_analysis/Full_CST_analysis/combined_full.csv")
+```
+
+```{r}
+#| echo: false
+CST_full_parameters <- combined_full |> mutate(accu = (Orthogon_CorrectSimple + Orthogon_CorrectJoint + Orthogon_CorrectEmbed + Oblique_CorrectSimple + Oblique_CorrectJoint + Oblique_CorrectEmbed)/6)
+```
+
+```{r}
+#| echo: false
+CST_full_parameters <- CST_full_parameters |>  
+                          mutate(Group = as.factor(Group),
+                                STEM = as.factor(STEM), 
+                                Sex =  as.factor(Sex))
+```
+
+```{r}
+#| echo: false
+# Define the desired order of factor levels
+desired_order <- c("Men", "NCF", "NCL", "OC", "IUD" )
+
+# Reorder the levels of the 'Group' factor variable
+CST_full_parameters$Group <- fct_relevel(CST_full_parameters$Group, desired_order)
+
+```
+
+```{r}
+#| echo: false
+CST_full_parameters <- CST_full_parameters |> 
+  mutate(Group = fct_recode(Group, "Males" = "Men"))
+```
+
+## 1. Main analysis
+
+### 1. 1 Demographic table
+
+```{r}
+Demographic_data <- CST_full_parameters |> dplyr::select(Age:Tes,-Sex, -anxiety)
+
+demographic_summary_1 <- Demographic_data |>
+  tbl_summary(
+    by = Group,
+    missing = "no",
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})"
+    )
+  ) |>
+  add_p(
+    test = all_continuous() ~ "aov",
+    pvalue_fun = function(x) style_pvalue(x, digits = 2)
+  )
+
+demographic_summary_1
+```
+
+### 1.2. Running ANOVA
+
+#### Assumption test:
+
+**Homogeneity of regression slope**
+
+```{r}
+CST_full_parameters |>  anova_test(accu ~ Group*Age*STEM)
+```
+
+No interaction with age, meaning the homogeneity in slopes in all group conditions.
+
+**Normality of assumption**
+
+```{r}
+CST_full_parameters |>
+  group_by(Group) |> 
+  shapiro_test(accu)
+```
+
+Violated just in males group, probably due to sealing effect. In men group n \> 30, still can use parametric statistic (central limit theorem).
+
+**Homoscedasticity test**
+
+```{r}
+model <- lm(accu ~ Group + STEM, data = CST_full_parameters)
+bptest(model)
+```
+
+Homoscedasticity assumption is not violated p \> 0.05
+
+**Conclusion:** Assumptions are not violated, we can use parametric statistic.
+
+#### ANOVA
+
+```{r}
+aov_1 <- CST_full_parameters |>  
+  anova_test(accu ~ Age + STEM + Group)
+get_anova_table(aov_1)
+```
+
+#### Pairwise comparison:
+
+```{r}
+pwc <- CST_full_parameters |> 
+  emmeans_test(
+    accu ~ Group, covariate = Age,
+    p.adjust.method = "bonferroni"
+    )
+pwc
+```
+
+```{r}
+CST_full_parameters |> 
+  group_by(Group) |> 
+  get_summary_stats(accu, type = "mean_se")
+```
+
+```{r}
+CST_full_parameters |> 
+  group_by(STEM) |> 
+  get_summary_stats(accu, type = "mean_se")
+```
+
+#### Graphic
+
+```{r}
+#| warning: false
+pwc <- pwc |> add_xy_position(x = "Group")
+pwc$y.position <- pwc$y.position+3
+Anova_result <- ggplot(CST_full_parameters, aes(Group, accu)) +
+  geom_violin(aes(fill = Group), width = 1) +
+  geom_boxplot(aes(fill = Group), width = 0.1, color = "black", alpha = 0.2) +
+  geom_jitter(width = 0.3, height = 0, alpha = 0.5, color = "black") +
+  labs(x = " ", y = "Accuracy, %") +
+  scale_fill_manual(values = c("#0072B2", "#009E73", "#E69F00", "#999999", "#CC79A7")) +
+  scale_y_continuous(limits = c(25, 115)) +  # Set y-axis limits
+  theme_classic() +
+  theme(axis.text = element_text(size = 14), legend.position = "none") +
+  theme(axis.title = element_text(size = 18)) +
+  stat_pvalue_manual(pwc, step.increase = 0.05, hide.ns = TRUE)
+
+
+Anova_result
+```
+
+### 1.3. Linear regression model
+
+### 1.3.1 Women
+
+```{r}
+#| echo: false
+women_data <- CST_full_parameters |> filter(Sex == 1)
+```
+
+```{r}
+#| echo: false
+dummy_matrix <- model.matrix(~ Group - 1, data = women_data)
+dummy_df <- as.data.frame(dummy_matrix)
+
+#Combining the dummy variables with the original data
+women_data <- cbind(women_data, dummy_df)
+
+
+women_data <- women_data[, -26] 
+```
+
+```{r}
+#| echo: false
+women_data <- women_data |> rename(
+  OC = GroupOC,
+  IUD = GroupIUD,
+  NCF = GroupNCF,
+  NCL = GroupNCL
+  )
+```
+
+```{r}
+#| echo: false
+women_data <- women_data |> 
+  mutate(
+    OC = as.factor(OC),
+    IUD = as.factor(IUD),
+    NCF = as.factor(NCF),
+    NCL = as.factor(NCL)
+  )
+```
+
+#### Running first LM model with all the variables
+
+```{r}
+women_lm_model <- lm(accu~ OC + IUD + NCL + Age + STEM + PANAS_PA + PANAS_NA + EA1 + EA2 + Tiredness_1 + Tiredness_2 + Femininity + Masculinity + P4 + E2 +Tes, data = women_data)
+```
+
+```{r}
+summary(women_lm_model)
+```
+
+#### Multicolinearity check up
+
+```{r}
+vif(women_lm_model)
+```
+
+All VIF score \< 3, no multicolinearity
+
+#### AIC procedure
+
+```{r}
+stepAIC(women_lm_model, direction = "backward")
+```
+
+As model suggest that IUD group differ from all other females, I would designate IUD group as reference group and in this case I will account for all hormonal status groups.
+
+#### Final model
+
+```{r}
+women_final <- lm(accu ~ OC + NCF + NCL + EA2 + Femininity + Masculinity, data  = women_data)
+```
+
+```{r}
+summary(women_final)
+```
+
+#### Assumption testing
+
+```{r}
+#| echo: false
+par(mfrow = c(2, 2))
+plot(women_final)
+```
+
+**Normality of residuals**
+
+```{r}
+#| echo: false
+#| output: false
+model.metrics.women <- augment(women_final) |> 
+  dplyr::select(-.hat, -.sigma, -.fitted)
+
+shapiro_test(model.metrics.women$.resid)
+```
+
+Normality of residual assuption is not violated, p \> 0.05
+
+**Homoscedasticity test**
+
+```{r}
+bptest(women_final)
+```
+
+Homoscedacity assumption is not violated, p \> 0.05
+
+**Independence of Errors test:**
+
+```{r}
+durbinWatsonTest(women_final)
+```
+
+Independence of errors assumption is not violated p \> 0.05.
+
+**Conclusion:** The model show good fit.
+
+#### Polynomial regression analysis for testosterone
+
+```{r}
+quadratic_model_women <- lm(accu  ~ poly(Tes, 2, raw = TRUE), data = women_data)
+summary(quadratic_model_women)
+```
+
+No quadratic effect of testosterone.
+
+### 1.3.2. Men
+
+**Tidying the table**
+
+```{r}
+#| echo: false
+men_data <- CST_full_parameters |> filter(Sex == 2) 
+```
+
+#### Running first LM model with all the variables
+
+```{r}
+men_lm_model <- lm(accu~ Age + STEM + PANAS_PA + PANAS_NA + EA1 + EA2 + Tiredness_1 + Tiredness_2 + Femininity + Masculinity +Tes, data = men_data)
+```
+
+```{r}
+summary(men_lm_model)
+```
+
+#### AIC procedure
+
+```{r}
+stepAIC(men_lm_model, direction = "backward")
+```
+
+#### Final model
+
+```{r}
+men_final <- lm(accu ~ EA1, data = men_data)
+```
+
+```{r}
+summary(men_final)
+```
+
+#### Assumptions testing
+
+```{r}
+#| echo: false
+par(mfrow = c(2, 2))
+plot(men_final)
+```
+
+**Normality of residuals**
+
+```{r}
+#| echo: false
+#| output: false
+model.metrics.men <- augment(men_final) |> 
+  dplyr::select(-.hat, -.sigma, -.fitted)
+
+shapiro_test(model.metrics.men$.resid)
+```
+
+```{r}
+ad.test(model.metrics.men$.resid)
+```
+
+IN QQ plot we can see that there is three outliers, otherwise the plot looks normal. At larger sample sizes the Shapiro-Wilk test becomes very sensitive even to a minor deviation from normality. Anderson-Darling normality test p \> 0.05, therefore I assume normal distribution.
+
+**Homoscedasticity test**
+
+```{r}
+bptest(men_final)
+```
+
+Probably 17, 24, 30 are "outliers" which are effecting homoscedasticity . Homoscedasticity assumption is violated p \< 0.05
+
+**Independence of Errors test:**
+
+```{r}
+durbinWatsonTest(men_final)
+```
+
+The independence of error assumption is violated.
+
+**Conclusion:** Some assumptions are violated therefore the model should be interpreted with cautious.
+
+```{r}
+men_lm <- ggplot(men_data, aes(x = EA1, y = accu)) +
+  geom_point(size = 3, alpha = 0.7) +  # Adjusting point 
+  geom_smooth(method = "lm", se = FALSE, color = "#0072B2", linetype = "dashed", size = 1.5) +  # Adjusting smooth line aesthetics
+  theme_minimal() +
+  labs(x = "EA1", y = "Accuracy, %", title = "y = 75.10 + 3.18X, p = 0.019 ") +  # Adding axis labels and title
+  theme(plot.title = element_text(size = 14, face = "bold"),  # Adjusting title font size and style
+        axis.text = element_text(size = 14),  # Adjusting axis text size
+        axis.title = element_text(size = 18, face = "bold"))  # Adjusting axis title size and style
+men_lm
+```
+
+```{r}
+
+ggsave("figures/men_lm.png", men_lm, width = 6, height = 4.5)
+
+```
+
+#### Polynomial regression analysis for testosterone
+
+```{r}
+quadratic_model_men <- lm(accu ~ poly(Tes, 2, raw = TRUE), data = men_data)
+```
+
+```{r}
+summary(quadratic_model_men)
+```
+
+No quadratic effect of testosterone
+
+### 1.4 Mediation analysis
+
+*Output of mediation analysis is not accessible as PROCESS v4.3 functions available as script, not a R package.*
+
+```{r}
+#| eval: false
+process (data = CST_full_parameters, y = "accu", x = "Sex", m ="EA2", model = 4, effsize =1, total =1, stand =1, cov = "STEM", boot = 10000 , seed = 654321)
+```
+
+Percentage of the sex difference explained by EA2
+
+```{r}
+Proc_EA <- (0.1400*100)/0.6201
+Proc_EA
+```

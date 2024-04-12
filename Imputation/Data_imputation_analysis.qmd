@@ -1,0 +1,290 @@
+---
+title: "Imputation and analysis"
+format: 
+  html:
+    toc: true
+    embed-resources: true
+---
+
+#### **Packages**
+
+```{r}
+#| output: false
+#| warning: false
+library(VIM)
+library(tidyverse)
+library(mice)
+```
+
+```{r}
+#| echo: false
+#| output: false
+data <- read_csv("data_final_plus.csv")
+```
+
+```{r}
+#| echo: false
+data <- data |> 
+  dplyr::select(Subject,CST = CorrectA,Age = Amzius, Group = GR, Sex = Lyt, STEM, anxiety, PANAS_PA, PANAS_NA, EA1 = Emo_arousal_1, EA2 = Emo_arousal_afterER, Tiredness_1, Tiredness_2 = Tiredness_afterER, Femininity = Fem_all,  Masculinity = Musc_all, P4 = Progesterone,E2 = Estradiol, Tes = Testosterone)
+```
+
+```{r}
+#| echo: false
+data <- data |>  mutate(Group = as.factor(Group),
+                                STEM = as.factor(STEM), 
+                                Sex =  as.factor(Sex))
+```
+
+```{r}
+#| echo: false
+data <- data |> mutate(Group = fct_recode(Group,
+  "OC" = "1",
+  "IUD" = "2",
+  "NCF" = "3",
+  "NCL" = "4",
+  "Men" = "5"
+))
+```
+
+```{r}
+#| echo: false
+ids_to_remove <- c(128)
+
+# Remove rows for the specified IDs in each dataset
+data <- data[!(data$Subject %in% ids_to_remove), ]
+```
+
+## 1. Filtering women data
+
+I impute women and men data separately as all men do not have E2 and P4 levels tested.
+
+```{r}
+data_women <- data |> filter(Sex ==1)
+```
+
+```{r}
+summary(data_women)
+```
+
+```{r}
+aggr(data_women)
+```
+
+### Imputation
+
+```{r}
+#| echo: false
+data_women_imp <- mice(data_women)
+```
+
+```{r}
+data_women_complete <- complete(data_women_imp)
+```
+
+### Checking the results
+
+```{r}
+summary(data_women)
+```
+
+```{r}
+summary(data_women_complete)
+```
+
+```{r}
+#| warning: false
+
+ggplot(data_women, aes(EA1, fill = Group))+
+  geom_density(alpha = 0.3)+
+    labs(title = "With NAs")
+
+ggplot(data_women_complete, aes(EA1, fill = Group))+
+  geom_density(alpha = 0.3)+
+    labs(title = "Imputed data")
+
+
+ggplot(data_women, aes(EA2, fill = Group))+
+  geom_density(alpha = 0.3)+
+    labs(title = "With NAs")
+
+ggplot(data_women_complete, aes(EA2, fill = Group))+
+  geom_density(alpha = 0.3)+
+    labs(title = "Imputed data")
+
+```
+
+```{r}
+#| warning: false
+ggplot(data_women, aes(EA1, fill = Group))+
+  geom_boxplot()+
+    labs(title = "With NAs")
+
+ggplot(data_women_complete, aes(EA1, fill = Group))+
+  geom_boxplot()+
+    labs(title = "Imputed data")
+
+
+ggplot(data_women, aes(EA2, fill = Group))+
+  geom_boxplot()+
+    labs(title = "With NAs")
+
+ggplot(data_women_complete, aes(EA2, fill = Group))+
+ geom_boxplot()+
+    labs(title = "Imputed data")
+
+```
+
+```{r}
+#| warning: false
+ggplot(data_women, aes(Tiredness_1, fill = Group))+
+  geom_density(alpha = 0.3)+
+    labs(title = "With NAs")
+
+ggplot(data_women_complete, aes(Tiredness_1, fill = Group))+
+  geom_density(alpha = 0.3)+
+    labs(title = "Imputed data")
+
+
+ggplot(data_women, aes(Tiredness_2, fill = Group))+
+  geom_density(alpha = 0.3)+
+    labs(title = "With NAs")
+
+ggplot(data_women_complete, aes(Tiredness_2, fill = Group))+
+  geom_density(alpha = 0.3)+
+    labs(title = "Imputed data")
+```
+
+```{r}
+#| warning: false
+ggplot(data_women, aes(Tiredness_1, fill = Group))+
+  geom_boxplot()+
+    labs(title = "With NAs")
+
+ggplot(data_women_complete, aes(Tiredness_1, fill = Group))+
+  geom_boxplot()+
+    labs(title = "Imputed data")
+
+
+ggplot(data_women, aes(Tiredness_2, fill = Group))+
+  geom_boxplot()+
+    labs(title = "With NAs")
+
+ggplot(data_women_complete, aes(Tiredness_2, fill = Group))+
+ geom_boxplot()+
+    labs(title = "Imputed data")
+```
+
+```{r}
+#| warning: false
+ggplot(data_women, aes(E2, fill = Group))+
+  geom_boxplot()+
+    labs(title = "With NAs")
+
+ggplot(data_women_complete, aes(E2, fill = Group))+
+  geom_boxplot()+
+    labs(title = "Imputed data")
+
+
+ggplot(data_women, aes(P4, fill = Group))+
+  geom_boxplot()+
+    labs(title = "With NAs")
+
+ggplot(data_women_complete, aes(P4, fill = Group))+
+ geom_boxplot()+
+    labs(title = "Imputed data")
+```
+
+## 2. Filtering men data
+
+```{r}
+data_men <- data |> filter(Sex ==2) |>  dplyr::select(-E2, -P4)
+  
+```
+
+```{r}
+summary(data_men)
+```
+
+```{r}
+aggr(data_men)
+```
+
+### Imputation
+
+```{r}
+data_men_imp <- mice(data_men)
+```
+
+```{r}
+data_men_complete <- complete(data_men_imp)
+```
+
+### Checking the results
+
+```{r}
+#| warning: false
+ggplot(data_men, aes(Tiredness_1))+
+  geom_density(alpha = 0.3)+
+    labs(title = "With NAs")
+
+ggplot(data_men_complete, aes(Tiredness_1))+
+  geom_density(alpha = 0.3)+
+    labs(title = "Imputed data")
+
+ggplot(data_men, aes(Tiredness_1))+
+  geom_boxplot()+
+    labs(title = "With NAs")
+
+ggplot(data_men_complete, aes(Tiredness_1))+
+  geom_boxplot()+
+    labs(title = "Imputed data")
+```
+
+```{r}
+#| warning: false
+
+ggplot(data_men, aes(EA1))+
+  geom_density(alpha = 0.3)+
+    labs(title = "With NAs")
+
+ggplot(data_men_complete, aes(EA1))+
+  geom_density(alpha = 0.3)+
+    labs(title = "Imputed data")
+
+
+ggplot(data_men, aes(EA1))+
+  geom_boxplot()+
+    labs(title = "With NAs")
+
+ggplot(data_men_complete, aes(EA1))+
+  geom_boxplot()+
+    labs(title = "Imputed data")
+```
+
+```{r}
+#| echo: false
+#| output: false
+t.test(data_men$EA1, data_men_complete$EA1)
+```
+
+```{r}
+#| echo: false
+#Combining tables into one
+data_men_complete <- data_men_complete %>%
+  mutate(E2 = NA,
+         P4 = NA) |> 
+  relocate(E2, P4, .before = "Tes") |> 
+  mutate(Group = as.factor(Group),
+        STEM = as.factor(STEM))
+
+```
+
+```{r}
+#| echo: false
+imputed_complete_data <- rbind(data_women_complete, data_men_complete)
+```
+
+```{r}
+#| echo: false
+write_csv(imputed_complete_data, "imputed_complete_data.csv")
+```
