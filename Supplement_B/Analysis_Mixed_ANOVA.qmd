@@ -70,15 +70,13 @@ full_parameters_long %>%
   get_summary_stats(score, type = "mean_sd")
 ```
 
-### Identify outliers 
+### Identify outliers
 
 ```{r}
 full_parameters_long %>%
   group_by(plane, figure, Group) %>%
   identify_outliers(score)
 ```
-
-No extreme outliers
 
 ### Normality
 
@@ -93,8 +91,6 @@ ggqqplot(full_parameters_long, "score", ggtheme = theme_bw()) +
   facet_grid(plane ~ figure)
 ```
 
-Niekas niekur normaliai nepasiskirstę, bet pagal QQ nėra taip blogai
-
 ### **Homogneity of variance assumption**
 
 ```{r}
@@ -103,22 +99,16 @@ full_parameters_long %>%
   levene_test(score ~ Group)
 ```
 
-Homogeniškumo prielaida nepažeista
+### ANOVA
 
 ```{r}
 res.aov <- anova_test(
   data = full_parameters_long, dv = score, wid = Subject,
-  between = c(Group, STEM), within = c(plane, figure), covariate = Age
-  )
+  between = c(Group, STEM), within = c(plane, figure))
 get_anova_table(res.aov)
 ```
 
-```{r}
-ggplot(full_parameters_long, aes(Age, score)) +
-  geom_point() +
-  geom_smooth(method = "lm")+
-  facet_grid(plane ~ figure)
-```
+### Pair-wise comparison
 
 ```{r}
 res.aov <- anova_test(
@@ -166,8 +156,6 @@ pwc2 <- full_parameters_long  |>
 pwc2
 ```
 
-
-
 ```{r}
 pwc3 <- full_parameters_long %>%
   group_by(plane) %>%
@@ -176,6 +164,3 @@ pwc3 <- full_parameters_long %>%
     p.adjust.method = "bonferroni") 
 pwc3
 ```
-
-
-
