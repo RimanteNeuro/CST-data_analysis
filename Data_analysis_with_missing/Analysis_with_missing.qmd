@@ -1,5 +1,5 @@
 ---
-title: Main analysis with missing values
+title: Demographic table, linear regression and mediation anlysis with missing data points 
 author: R. Gaizauskaite
 format: 
   html:
@@ -24,7 +24,7 @@ library(nortest)
 
 ```{r}
 #| echo: false
-combined_full <- read_csv("C:/Users/Rokas/Desktop/Mantes dokumentai/Dok. reikalingi failai/Skerspjūvio analizė/final_final_analysis/Full_CST_analysis/Data_with_missing.csv")
+combined_full <- read_csv("full_data_plusNCL.csv")
 ```
 
 ```{r}
@@ -124,14 +124,14 @@ women_data <- women_data |>
 ```
 
 ```{r}
-women_data <- women_data |> drop_na( EA1, EA2, Tiredness_1, Tiredness_2, P4, E2, Tes)
+women_data_drop <- women_data |> drop_na( EA1, EA2, Tiredness_1, Tiredness_2, P4, E2, Tes)
 ```
 
 
 #### Running first LM model with all the variables
 
 ```{r}
-women_lm_model <- lm(accu~ OC + IUD + NCL + Age + STEM + PANAS_PA + PANAS_NA + EA1 + EA2 + Tiredness_1 + Tiredness_2 + Femininity + Masculinity + P4 + E2 +Tes, data = women_data)
+women_lm_model <- lm(accu~ OC + IUD + NCL + Age + STEM + PANAS_PA + PANAS_NA + EA1 + EA2 + Tiredness_1 + Tiredness_2 + Femininity + Masculinity + P4 + E2 +Tes, data = women_data_drop)
 ```
 
 ```{r}
@@ -157,7 +157,7 @@ As model suggest IUD group to stay, i would do little bit differently and IUD gr
 #### Final model
 
 ```{r}
-women_final <- lm(accu ~ OC + NCF + NCL + EA2 + Femininity + STEM, data  = women_data)
+women_final <- lm(accu ~ OC + NCF + NCL + STEM + EA2 + Tes, data  = women_data_drop)
 ```
 
 ```{r}
@@ -202,6 +202,31 @@ durbinWatsonTest(women_final)
 Independence of errors assumption is not violated p \< 0.05.
 
 **Conclusion:** The model show good fit.
+
+#### trying new way
+
+```{r}
+
+```
+
+```{r}
+# Install and load the MuMIn package
+library(MuMIn)
+
+# Build your global model
+global_model <- lm(accu~ OC + IUD + NCL + Age + STEM + PANAS_PA + PANAS_NA + EA1 + EA2 + Tiredness_1 + Tiredness_2 + Femininity + Masculinity + P4 + E2 +Tes, data = women_data, na.action=na.fail)
+
+# Perform model selection
+model_set <- dredge(global_model)
+
+# Model averaging
+averaged_model <- model.avg(model_set, subset = delta < 2)
+
+# AIC of the averaged model
+AIC(averaged_model)
+```
+
+
 
 #### Polinomynal regression analysis for testosterone
 
@@ -286,7 +311,7 @@ Probably 17, 24, 30 are "outliers" which are effecting homoscedacity. Homoscedac
 durbinWatsonTest(men_final)
 ```
 
-The independence of error assumption is violated.
+The independence of error assumption is notviolated.
 
 **Conclusion:** Some assumptions are violated therefore the model should be interpreted with cautious.
 
@@ -308,13 +333,22 @@ No quadratic effect of testosterone
 
 ```{r}
 #| eval: false
-process (data = CST_full_parameters, y = "accu", x = "Sex", m ="EA2", model = 4, effsize =1, total =1, stand =1, cov = "STEM", boot = 10000 , seed = 654321)
+CST_full_parameters <- CST_full_parameters |>  
+                          mutate(Group = as.numeric(Group),
+                                STEM = as.numeric(STEM), 
+                                Sex =  as.numeric(Sex))
+```
+
+
+```{r}
+#| eval: false
+process (data = CST_full_parameters, y = "accu", x = "Sex", m ="EA2", model = 4, effsize =1, total =1, stand =1, cov = c("Age", "STEM"), boot = 10000 , seed = 654321)
 ```
 Percentage of the sex difference explained by EA2 
 
 
 ```{r}
-Proc_EA <- (0.1303*100)/0.6075
+Proc_EA <- (0.1361*100)/0.6144
 Proc_EA
 ```
 
