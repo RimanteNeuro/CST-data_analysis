@@ -19,13 +19,13 @@ library(mice)
 ```{r}
 #| echo: false
 #| output: false
-data <- read_csv("data_final_plus.csv")
+data <- read_csv("full_data_plusNCL.csv")
 ```
 
 ```{r}
 #| echo: false
 data <- data |> 
-  dplyr::select(Subject,CST = CorrectA,Age = Amzius, Group = GR, Sex = Lyt, STEM, anxiety, PANAS_PA, PANAS_NA, EA1 = Emo_arousal_1, EA2 = Emo_arousal_afterER, Tiredness_1, Tiredness_2 = Tiredness_afterER, Femininity = Fem_all,  Masculinity = Musc_all, P4 = Progesterone,E2 = Estradiol, Tes = Testosterone)
+  dplyr::select(Subject,Age, Group, Sex, STEM, PANAS_PA, PANAS_NA, EA1, EA2, Tiredness_1, Tiredness_2 , Femininity,  Masculinity, P4, E2, Tes, Orthogon_CorrectSimple, Orthogon_CorrectJoint, Orthogon_CorrectEmbed, Oblique_CorrectSimple, Oblique_CorrectJoint, Oblique_CorrectEmbed)
 ```
 
 ```{r}
@@ -286,5 +286,5 @@ imputed_complete_data <- rbind(data_women_complete, data_men_complete)
 
 ```{r}
 #| echo: false
-write_csv(imputed_complete_data, "imputed_complete_data.csv")
+write_csv(imputed_complete_data, "imputed_complete_data_plusNCL.csv")
 ```
