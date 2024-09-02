@@ -1,8 +1,10 @@
 ---
 title: "Full_CST_analysis"
 author: "R. Gaizauskaite"
-format: html
-editor: visual
+format: 
+  html:
+    toc: true
+    embed-resources: true
 ---
 
 ## Preparation for analysis
@@ -20,7 +22,7 @@ library(ggpubr)
 ### Load data
 
 ```{r}
-combined_full <- read_csv("Full_CST_analysis/combined_full.csv")
+combined_full <- read_csv("full_data_plusNCL.csv")
 ```
 
 ```{r}
@@ -78,6 +80,8 @@ full_parameters_long %>%
   identify_outliers(score)
 ```
 
+No extreme outliers
+
 ### Normality
 
 ```{r}
@@ -91,6 +95,8 @@ ggqqplot(full_parameters_long, "score", ggtheme = theme_bw()) +
   facet_grid(plane ~ figure)
 ```
 
+Niekas niekur normaliai nepasiskirstę, bet pagal QQ nėra taip blogai
+
 ### **Homogneity of variance assumption**
 
 ```{r}
@@ -99,16 +105,22 @@ full_parameters_long %>%
   levene_test(score ~ Group)
 ```
 
-### ANOVA
+Homogeniškumo prielaida nepažeista
 
 ```{r}
 res.aov <- anova_test(
   data = full_parameters_long, dv = score, wid = Subject,
-  between = c(Group, STEM), within = c(plane, figure))
+  between = Group, within = c(plane, figure), covariate = c(Age, STEM)
+  )
 get_anova_table(res.aov)
 ```
 
-### Pair-wise comparison
+```{r}
+ggplot(full_parameters_long, aes(Age, score)) +
+  geom_point() +
+  geom_smooth(method = "lm")+
+  facet_grid(plane ~ figure)
+```
 
 ```{r}
 res.aov <- anova_test(
@@ -163,4 +175,10 @@ pwc3 <- full_parameters_long %>%
     score ~ STEM, paired = FALSE, 
     p.adjust.method = "bonferroni") 
 pwc3
+```
+
+```{r}
+full_parameters_long |> 
+  group_by(plane,STEM) %>% 
+  get_summary_stats(score, type = "mean_sd")
 ```
