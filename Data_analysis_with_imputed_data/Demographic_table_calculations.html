@@ -1,0 +1,1964 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.56">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Demographic_table_results</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Demographic_table_calculations_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Demographic_table_calculations_files/libs/quarto-html/quarto.js"></script>
+<script src="Demographic_table_calculations_files/libs/quarto-html/popper.min.js"></script>
+<script src="Demographic_table_calculations_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Demographic_table_calculations_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Demographic_table_calculations_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Demographic_table_calculations_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Demographic_table_calculations_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Demographic_table_calculations_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Demographic_table_calculations_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Demographic_table_results</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="libraries" class="level3">
+<h3 class="anchored" data-anchor-id="libraries">Libraries</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rstatix)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gtsummary)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lmtest)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggpubr)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(car)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MASS)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nortest)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 166 Columns: 22
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr  (1): Group
+dbl (21): Subject, Age, Sex, STEM, PANAS_PA, PANAS_NA, EA1, EA2, Tiredness_1...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+</div>
+</section>
+<section id="main-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="main-analysis">1. Main analysis</h2>
+<section id="demographic-table" class="level3">
+<h3 class="anchored" data-anchor-id="demographic-table">1. 1 Demographic table</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Demographic_data <span class="ot">&lt;-</span> CST_final <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(Age<span class="sc">:</span>Tes,<span class="sc">-</span>Sex)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>demographic_summary_1 <span class="ot">&lt;-</span> Demographic_data <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tbl_summary</span>(</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> Group,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">missing =</span> <span class="st">"no"</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">statistic =</span> <span class="fu">list</span>(</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">all_continuous</span>() <span class="sc">~</span> <span class="st">"{mean} ({sd})"</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_p</span>(</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">test =</span> <span class="fu">all_continuous</span>() <span class="sc">~</span> <span class="st">"aov"</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">pvalue_fun =</span> <span class="cf">function</span>(x) <span class="fu">style_pvalue</span>(x, <span class="at">digits =</span> <span class="dv">2</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following warning was returned in `add_p()` for variable "Age"
+! The test "aov" in `add_p(test)` was deprecated in gtsummary 2.0.0. ℹ The same
+  functionality is covered with "oneway.test". Use the following code instead:
+  ℹ `add_p(test = list(Age = 'oneway.test'), test.args = list(Age =
+  list(var.equal = TRUE)))`.
+The following warning was returned in `add_p()` for variable "PANAS_PA"
+! The test "aov" in `add_p(test)` was deprecated in gtsummary 2.0.0. ℹ The same
+  functionality is covered with "oneway.test". Use the following code instead:
+  ℹ `add_p(test = list(PANAS_PA = 'oneway.test'), test.args = list(PANAS_PA =
+  list(var.equal = TRUE)))`.
+The following warning was returned in `add_p()` for variable "PANAS_NA"
+! The test "aov" in `add_p(test)` was deprecated in gtsummary 2.0.0. ℹ The same
+  functionality is covered with "oneway.test". Use the following code instead:
+  ℹ `add_p(test = list(PANAS_NA = 'oneway.test'), test.args = list(PANAS_NA =
+  list(var.equal = TRUE)))`.
+The following warning was returned in `add_p()` for variable "EA1"
+! The test "aov" in `add_p(test)` was deprecated in gtsummary 2.0.0. ℹ The same
+  functionality is covered with "oneway.test". Use the following code instead:
+  ℹ `add_p(test = list(EA1 = 'oneway.test'), test.args = list(EA1 =
+  list(var.equal = TRUE)))`.
+The following warning was returned in `add_p()` for variable "EA2"
+! The test "aov" in `add_p(test)` was deprecated in gtsummary 2.0.0. ℹ The same
+  functionality is covered with "oneway.test". Use the following code instead:
+  ℹ `add_p(test = list(EA2 = 'oneway.test'), test.args = list(EA2 =
+  list(var.equal = TRUE)))`.
+The following warning was returned in `add_p()` for variable "Tiredness_1"
+! The test "aov" in `add_p(test)` was deprecated in gtsummary 2.0.0. ℹ The same
+  functionality is covered with "oneway.test". Use the following code instead:
+  ℹ `add_p(test = list(Tiredness_1 = 'oneway.test'), test.args =
+  list(Tiredness_1 = list(var.equal = TRUE)))`.
+The following warning was returned in `add_p()` for variable "Tiredness_2"
+! The test "aov" in `add_p(test)` was deprecated in gtsummary 2.0.0. ℹ The same
+  functionality is covered with "oneway.test". Use the following code instead:
+  ℹ `add_p(test = list(Tiredness_2 = 'oneway.test'), test.args =
+  list(Tiredness_2 = list(var.equal = TRUE)))`.
+The following warning was returned in `add_p()` for variable "Femininity"
+! The test "aov" in `add_p(test)` was deprecated in gtsummary 2.0.0. ℹ The same
+  functionality is covered with "oneway.test". Use the following code instead:
+  ℹ `add_p(test = list(Femininity = 'oneway.test'), test.args = list(Femininity
+  = list(var.equal = TRUE)))`.
+The following warning was returned in `add_p()` for variable "Masculinity"
+! The test "aov" in `add_p(test)` was deprecated in gtsummary 2.0.0. ℹ The same
+  functionality is covered with "oneway.test". Use the following code instead:
+  ℹ `add_p(test = list(Masculinity = 'oneway.test'), test.args =
+  list(Masculinity = list(var.equal = TRUE)))`.
+The following warning was returned in `add_p()` for variable "P4"
+! The test "aov" in `add_p(test)` was deprecated in gtsummary 2.0.0. ℹ The same
+  functionality is covered with "oneway.test". Use the following code instead:
+  ℹ `add_p(test = list(P4 = 'oneway.test'), test.args = list(P4 =
+  list(var.equal = TRUE)))`.
+The following warning was returned in `add_p()` for variable "E2"
+! The test "aov" in `add_p(test)` was deprecated in gtsummary 2.0.0. ℹ The same
+  functionality is covered with "oneway.test". Use the following code instead:
+  ℹ `add_p(test = list(E2 = 'oneway.test'), test.args = list(E2 =
+  list(var.equal = TRUE)))`.
+The following warning was returned in `add_p()` for variable "Tes"
+! The test "aov" in `add_p(test)` was deprecated in gtsummary 2.0.0. ℹ The same
+  functionality is covered with "oneway.test". Use the following code instead:
+  ℹ `add_p(test = list(Tes = 'oneway.test'), test.args = list(Tes =
+  list(var.equal = TRUE)))`.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>demographic_summary_1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="xvuxdkwgxx" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#xvuxdkwgxx table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#xvuxdkwgxx thead, #xvuxdkwgxx tbody, #xvuxdkwgxx tfoot, #xvuxdkwgxx tr, #xvuxdkwgxx td, #xvuxdkwgxx th {
+  border-style: none;
+}
+
+#xvuxdkwgxx p {
+  margin: 0;
+  padding: 0;
+}
+
+#xvuxdkwgxx .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#xvuxdkwgxx .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#xvuxdkwgxx .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#xvuxdkwgxx .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#xvuxdkwgxx .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#xvuxdkwgxx .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#xvuxdkwgxx .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#xvuxdkwgxx .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#xvuxdkwgxx .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#xvuxdkwgxx .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#xvuxdkwgxx .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#xvuxdkwgxx .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#xvuxdkwgxx .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#xvuxdkwgxx .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#xvuxdkwgxx .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#xvuxdkwgxx .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#xvuxdkwgxx .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#xvuxdkwgxx .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#xvuxdkwgxx .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#xvuxdkwgxx .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#xvuxdkwgxx .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#xvuxdkwgxx .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#xvuxdkwgxx .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#xvuxdkwgxx .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#xvuxdkwgxx .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#xvuxdkwgxx .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#xvuxdkwgxx .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#xvuxdkwgxx .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#xvuxdkwgxx .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#xvuxdkwgxx .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#xvuxdkwgxx .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#xvuxdkwgxx .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#xvuxdkwgxx .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#xvuxdkwgxx .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#xvuxdkwgxx .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#xvuxdkwgxx .gt_left {
+  text-align: left;
+}
+
+#xvuxdkwgxx .gt_center {
+  text-align: center;
+}
+
+#xvuxdkwgxx .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#xvuxdkwgxx .gt_font_normal {
+  font-weight: normal;
+}
+
+#xvuxdkwgxx .gt_font_bold {
+  font-weight: bold;
+}
+
+#xvuxdkwgxx .gt_font_italic {
+  font-style: italic;
+}
+
+#xvuxdkwgxx .gt_super {
+  font-size: 65%;
+}
+
+#xvuxdkwgxx .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#xvuxdkwgxx .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#xvuxdkwgxx .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#xvuxdkwgxx .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#xvuxdkwgxx .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#xvuxdkwgxx .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#xvuxdkwgxx .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#xvuxdkwgxx .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#xvuxdkwgxx div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header gt_col_headings">
+<th id="<div data-qmd-base64=&quot;KipDaGFyYWN0ZXJpc3RpYyoq&quot;><div class='gt_from_md'><p><strong>Characteristic</strong></p>
+</div></div>" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col"><p><strong>Characteristic</strong></p></th>
+<th id="<div data-qmd-base64=&quot;KipNYWxlcyoqICAKTiA9IDM1&quot;><div class='gt_from_md'><p><strong>Males</strong><br />
+N = 35</p>
+</div></div><span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;line-height: 0;&quot;><sup>1</sup></span>" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><p><strong>Males</strong><br>
+N = 35</p>
+<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height: 0;"><sup>1</sup></span></th>
+<th id="<div data-qmd-base64=&quot;KipOQ0YqKiAgCk4gPSAzNw==&quot;><div class='gt_from_md'><p><strong>NCF</strong><br />
+N = 37</p>
+</div></div><span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;line-height: 0;&quot;><sup>1</sup></span>" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><p><strong>NCF</strong><br>
+N = 37</p>
+<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height: 0;"><sup>1</sup></span></th>
+<th id="<div data-qmd-base64=&quot;KipOQ0wqKiAgCk4gPSAzNg==&quot;><div class='gt_from_md'><p><strong>NCL</strong><br />
+N = 36</p>
+</div></div><span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;line-height: 0;&quot;><sup>1</sup></span>" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><p><strong>NCL</strong><br>
+N = 36</p>
+<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height: 0;"><sup>1</sup></span></th>
+<th id="<div data-qmd-base64=&quot;KipPQyoqICAKTiA9IDI3&quot;><div class='gt_from_md'><p><strong>OC</strong><br />
+N = 27</p>
+</div></div><span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;line-height: 0;&quot;><sup>1</sup></span>" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><p><strong>OC</strong><br>
+N = 27</p>
+<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height: 0;"><sup>1</sup></span></th>
+<th id="<div data-qmd-base64=&quot;KipJVUQqKiAgCk4gPSAzMQ==&quot;><div class='gt_from_md'><p><strong>IUD</strong><br />
+N = 31</p>
+</div></div><span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;line-height: 0;&quot;><sup>1</sup></span>" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><p><strong>IUD</strong><br>
+N = 31</p>
+<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height: 0;"><sup>1</sup></span></th>
+<th id="<div data-qmd-base64=&quot;KipwLXZhbHVlKio=&quot;><div class='gt_from_md'><p><strong>p-value</strong></p>
+</div></div><span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;line-height: 0;&quot;><sup>2</sup></span>" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><p><strong>p-value</strong></p>
+<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height: 0;"><sup>2</sup></span></th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">Age</td>
+<td class="gt_row gt_center" headers="stat_1">26.5 (4.1)</td>
+<td class="gt_row gt_center" headers="stat_2">27.6 (5.2)</td>
+<td class="gt_row gt_center" headers="stat_3">26.4 (4.4)</td>
+<td class="gt_row gt_center" headers="stat_4">24.1 (3.6)</td>
+<td class="gt_row gt_center" headers="stat_5">27.5 (4.3)</td>
+<td class="gt_row gt_center" headers="p.value">0.025</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">STEM</td>
+<td class="gt_row gt_center" headers="stat_1"><br>
+</td>
+<td class="gt_row gt_center" headers="stat_2"><br>
+</td>
+<td class="gt_row gt_center" headers="stat_3"><br>
+</td>
+<td class="gt_row gt_center" headers="stat_4"><br>
+</td>
+<td class="gt_row gt_center" headers="stat_5"><br>
+</td>
+<td class="gt_row gt_center" headers="p.value">0.001</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;0</td>
+<td class="gt_row gt_center" headers="stat_1">11 (31%)</td>
+<td class="gt_row gt_center" headers="stat_2">29 (78%)</td>
+<td class="gt_row gt_center" headers="stat_3">24 (67%)</td>
+<td class="gt_row gt_center" headers="stat_4">14 (52%)</td>
+<td class="gt_row gt_center" headers="stat_5">19 (61%)</td>
+<td class="gt_row gt_center" headers="p.value"><br>
+</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;1</td>
+<td class="gt_row gt_center" headers="stat_1">24 (69%)</td>
+<td class="gt_row gt_center" headers="stat_2">8 (22%)</td>
+<td class="gt_row gt_center" headers="stat_3">12 (33%)</td>
+<td class="gt_row gt_center" headers="stat_4">13 (48%)</td>
+<td class="gt_row gt_center" headers="stat_5">12 (39%)</td>
+<td class="gt_row gt_center" headers="p.value"><br>
+</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">PANAS_PA</td>
+<td class="gt_row gt_center" headers="stat_1">35.5 (4.8)</td>
+<td class="gt_row gt_center" headers="stat_2">38.0 (5.6)</td>
+<td class="gt_row gt_center" headers="stat_3">36.7 (6.2)</td>
+<td class="gt_row gt_center" headers="stat_4">34.8 (5.7)</td>
+<td class="gt_row gt_center" headers="stat_5">36.8 (6.2)</td>
+<td class="gt_row gt_center" headers="p.value">0.19</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">PANAS_NA</td>
+<td class="gt_row gt_center" headers="stat_1">23 (7)</td>
+<td class="gt_row gt_center" headers="stat_2">26 (7)</td>
+<td class="gt_row gt_center" headers="stat_3">26 (8)</td>
+<td class="gt_row gt_center" headers="stat_4">24 (7)</td>
+<td class="gt_row gt_center" headers="stat_5">26 (6)</td>
+<td class="gt_row gt_center" headers="p.value">0.27</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">EA1</td>
+<td class="gt_row gt_center" headers="stat_1">2.56 (1.98)</td>
+<td class="gt_row gt_center" headers="stat_2">3.49 (2.35)</td>
+<td class="gt_row gt_center" headers="stat_3">3.16 (2.30)</td>
+<td class="gt_row gt_center" headers="stat_4">3.26 (2.51)</td>
+<td class="gt_row gt_center" headers="stat_5">3.59 (2.34)</td>
+<td class="gt_row gt_center" headers="p.value">0.37</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">EA2</td>
+<td class="gt_row gt_center" headers="stat_1">3.79 (2.44)</td>
+<td class="gt_row gt_center" headers="stat_2">5.26 (2.71)</td>
+<td class="gt_row gt_center" headers="stat_3">5.02 (2.43)</td>
+<td class="gt_row gt_center" headers="stat_4">4.57 (2.66)</td>
+<td class="gt_row gt_center" headers="stat_5">4.83 (2.81)</td>
+<td class="gt_row gt_center" headers="p.value">0.16</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">Tiredness_1</td>
+<td class="gt_row gt_center" headers="stat_1">3.21 (2.33)</td>
+<td class="gt_row gt_center" headers="stat_2">2.91 (2.27)</td>
+<td class="gt_row gt_center" headers="stat_3">2.96 (2.33)</td>
+<td class="gt_row gt_center" headers="stat_4">2.91 (2.39)</td>
+<td class="gt_row gt_center" headers="stat_5">2.94 (2.25)</td>
+<td class="gt_row gt_center" headers="p.value">0.98</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">Tiredness_2</td>
+<td class="gt_row gt_center" headers="stat_1">5.32 (2.33)</td>
+<td class="gt_row gt_center" headers="stat_2">5.06 (2.22)</td>
+<td class="gt_row gt_center" headers="stat_3">6.03 (1.97)</td>
+<td class="gt_row gt_center" headers="stat_4">5.52 (1.79)</td>
+<td class="gt_row gt_center" headers="stat_5">5.57 (2.48)</td>
+<td class="gt_row gt_center" headers="p.value">0.43</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">Femininity</td>
+<td class="gt_row gt_center" headers="stat_1">4.37 (0.46)</td>
+<td class="gt_row gt_center" headers="stat_2">5.02 (0.54)</td>
+<td class="gt_row gt_center" headers="stat_3">5.11 (0.42)</td>
+<td class="gt_row gt_center" headers="stat_4">4.81 (0.48)</td>
+<td class="gt_row gt_center" headers="stat_5">4.88 (0.54)</td>
+<td class="gt_row gt_center" headers="p.value">&lt;0.001</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">Masculinity</td>
+<td class="gt_row gt_center" headers="stat_1">4.79 (0.66)</td>
+<td class="gt_row gt_center" headers="stat_2">4.28 (0.64)</td>
+<td class="gt_row gt_center" headers="stat_3">4.39 (0.66)</td>
+<td class="gt_row gt_center" headers="stat_4">4.25 (0.75)</td>
+<td class="gt_row gt_center" headers="stat_5">4.10 (0.80)</td>
+<td class="gt_row gt_center" headers="p.value">0.001</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">P4</td>
+<td class="gt_row gt_center" headers="stat_1">NA (NA)</td>
+<td class="gt_row gt_center" headers="stat_2">74 (48)</td>
+<td class="gt_row gt_center" headers="stat_3">218 (137)</td>
+<td class="gt_row gt_center" headers="stat_4">100 (63)</td>
+<td class="gt_row gt_center" headers="stat_5">100 (85)</td>
+<td class="gt_row gt_center" headers="p.value">&lt;0.001</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">E2</td>
+<td class="gt_row gt_center" headers="stat_1">NA (NA)</td>
+<td class="gt_row gt_center" headers="stat_2">1.38 (0.49)</td>
+<td class="gt_row gt_center" headers="stat_3">1.48 (0.54)</td>
+<td class="gt_row gt_center" headers="stat_4">1.26 (0.82)</td>
+<td class="gt_row gt_center" headers="stat_5">1.48 (0.63)</td>
+<td class="gt_row gt_center" headers="p.value">0.44</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">Tes</td>
+<td class="gt_row gt_center" headers="stat_1">234 (65)</td>
+<td class="gt_row gt_center" headers="stat_2">76 (26)</td>
+<td class="gt_row gt_center" headers="stat_3">78 (24)</td>
+<td class="gt_row gt_center" headers="stat_4">57 (17)</td>
+<td class="gt_row gt_center" headers="stat_5">81 (26)</td>
+<td class="gt_row gt_center" headers="p.value">&lt;0.001</td>
+</tr>
+</tbody><tfoot class="gt_footnotes">
+<tr class="even">
+<td colspan="7" class="gt_footnote"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height: 0;"><sup>1</sup></span>
+<p>Mean (SD); n (%)</p></td>
+</tr>
+<tr class="odd">
+<td colspan="7" class="gt_footnote"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height: 0;"><sup>2</sup></span>
+<p>One-way analysis of means; Pearson’s Chi-squared test</p></td>
+</tr>
+</tfoot>
+
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="parametricity" class="level3">
+<h3 class="anchored" data-anchor-id="parametricity">Parametricity</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span> </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Group) <span class="sc">|&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">shapiro_test</span>(Age, PANAS_PA, PANAS_NA, EA1, EA2, Tiredness_1, Tiredness_2, Femininity, Masculinity, P4, E2, Tes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 58 × 4
+   Group variable    statistic       p
+   &lt;fct&gt; &lt;chr&gt;           &lt;dbl&gt;   &lt;dbl&gt;
+ 1 Males Age             0.953 0.143  
+ 2 Males EA1             0.908 0.00642
+ 3 Males EA2             0.957 0.180  
+ 4 Males Femininity      0.976 0.621  
+ 5 Males Masculinity     0.967 0.367  
+ 6 Males PANAS_NA        0.961 0.239  
+ 7 Males PANAS_PA        0.956 0.177  
+ 8 Males Tes             0.969 0.412  
+ 9 Males Tiredness_1     0.917 0.0116 
+10 Males Tiredness_2     0.972 0.512  
+# ℹ 48 more rows</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span> </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Group) <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">shapiro_test</span>(Age, PANAS_PA, PANAS_NA, EA1, EA2, Tiredness_1, Tiredness_2, Femininity, Masculinity, P4, E2, Tes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 58 × 4
+   Group variable    statistic       p
+   &lt;fct&gt; &lt;chr&gt;           &lt;dbl&gt;   &lt;dbl&gt;
+ 1 Males Age             0.953 0.143  
+ 2 Males EA1             0.908 0.00642
+ 3 Males EA2             0.957 0.180  
+ 4 Males Femininity      0.976 0.621  
+ 5 Males Masculinity     0.967 0.367  
+ 6 Males PANAS_NA        0.961 0.239  
+ 7 Males PANAS_PA        0.956 0.177  
+ 8 Males Tes             0.969 0.412  
+ 9 Males Tiredness_1     0.917 0.0116 
+10 Males Tiredness_2     0.972 0.512  
+# ℹ 48 more rows</code></pre>
+</div>
+</div>
+<section id="age" class="level4">
+<h4 class="anchored" data-anchor-id="age">Age</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span> </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Group) <span class="sc">|&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">shapiro_test</span>(Age)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 4
+  Group variable statistic       p
+  &lt;fct&gt; &lt;chr&gt;        &lt;dbl&gt;   &lt;dbl&gt;
+1 Males Age          0.953 0.143  
+2 NCF   Age          0.912 0.00628
+3 NCL   Age          0.963 0.272  
+4 OC    Age          0.940 0.120  
+5 IUD   Age          0.944 0.108  </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span> </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">levene_test</span>(Age<span class="sc">~</span>Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 4
+    df1   df2 statistic     p
+  &lt;int&gt; &lt;int&gt;     &lt;dbl&gt; &lt;dbl&gt;
+1     4   161      1.93 0.109</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>res.aov <span class="ot">&lt;-</span> CST_final <span class="sc">|&gt;</span>  <span class="fu">anova_test</span>(Age <span class="sc">~</span> Group)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>res.aov</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ANOVA Table (type II tests)
+
+  Effect DFn DFd     F     p p&lt;.05   ges
+1  Group   4 161 2.855 0.025     * 0.066</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span> <span class="fu">tukey_hsd</span>(Age <span class="sc">~</span> Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 9
+   term  group1 group2 null.value estimate conf.low conf.high p.adj p.adj.signif
+ * &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;       &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+ 1 Group Males  NCF             0   1.08     -1.80      3.96  0.838 ns          
+ 2 Group Males  NCL             0  -0.0690   -2.97      2.83  1     ns          
+ 3 Group Males  OC              0  -2.34     -5.47      0.790 0.242 ns          
+ 4 Group Males  IUD             0   1.03     -1.98      4.04  0.879 ns          
+ 5 Group NCF    NCL             0  -1.15     -4.01      1.71  0.801 ns          
+ 6 Group NCF    OC              0  -3.42     -6.51     -0.329 0.022 *           
+ 7 Group NCF    IUD             0  -0.0514   -3.02      2.92  1     ns          
+ 8 Group NCL    OC              0  -2.27     -5.38      0.840 0.264 ns          
+ 9 Group NCL    IUD             0   1.10     -1.89      4.09  0.849 ns          
+10 Group OC     IUD             0   3.37      0.154     6.58  0.035 *           </code></pre>
+</div>
+</div>
+</section>
+<section id="stem" class="level4">
+<h4 class="anchored" data-anchor-id="stem">STEM</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>STEM <span class="ot">&lt;-</span> <span class="fu">table</span>(CST_final<span class="sc">$</span>STEM, CST_final<span class="sc">$</span>Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chisq_test</span>(STEM)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 6
+      n statistic       p    df method          p.signif
+* &lt;int&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt; &lt;chr&gt;           &lt;chr&gt;   
+1   166      18.2 0.00115     4 Chi-square test **      </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pairwise_chisq_gof_test</span>(STEM,<span class="at">p.adjust.method =</span> <span class="st">"fdr"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 45 × 8
+       n group1 group2 statistic       p    df  p.adj p.adj.signif
+ * &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;       
+ 1     2 grp1   grp2      4.83   0.028       1 0.126  ns          
+ 2     2 grp1   grp3      8.1    0.00443     1 0.0526 ns          
+ 3     2 grp1   grp4      0.474  0.491       1 0.651  ns          
+ 4     2 grp1   grp5      4.83   0.028       1 0.126  ns          
+ 5     2 grp1   grp6      0.0435 0.835       1 0.886  ns          
+ 6     2 grp1   grp7      0.36   0.549       1 0.706  ns          
+ 7     2 grp1   grp8      0.167  0.683       1 0.823  ns          
+ 8     2 grp1   grp9      2.13   0.144       1 0.319  ns          
+ 9     2 grp1   grp10     0.0435 0.835       1 0.886  ns          
+10     2 grp2   grp3      0.472  0.492       1 0.651  ns          
+# ℹ 35 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="panas" class="level4">
+<h4 class="anchored" data-anchor-id="panas">PANAS</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span> </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Group) <span class="sc">|&gt;</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">shapiro_test</span>(PANAS_PA, PANAS_NA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 4
+   Group variable statistic      p
+   &lt;fct&gt; &lt;chr&gt;        &lt;dbl&gt;  &lt;dbl&gt;
+ 1 Males PANAS_NA     0.961 0.239 
+ 2 Males PANAS_PA     0.956 0.177 
+ 3 NCF   PANAS_NA     0.981 0.765 
+ 4 NCF   PANAS_PA     0.963 0.247 
+ 5 NCL   PANAS_NA     0.921 0.0137
+ 6 NCL   PANAS_PA     0.963 0.271 
+ 7 OC    PANAS_NA     0.966 0.491 
+ 8 OC    PANAS_PA     0.979 0.839 
+ 9 IUD   PANAS_NA     0.980 0.812 
+10 IUD   PANAS_PA     0.949 0.146 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span> </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">levene_test</span>(PANAS_PA<span class="sc">~</span>Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 4
+    df1   df2 statistic     p
+  &lt;int&gt; &lt;int&gt;     &lt;dbl&gt; &lt;dbl&gt;
+1     4   161      1.01 0.406</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span> </span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">levene_test</span>(PANAS_NA<span class="sc">~</span>Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 4
+    df1   df2 statistic     p
+  &lt;int&gt; &lt;int&gt;     &lt;dbl&gt; &lt;dbl&gt;
+1     4   161     0.658 0.622</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>res.aov2 <span class="ot">&lt;-</span> CST_final <span class="sc">|&gt;</span>  <span class="fu">anova_test</span>(PANAS_PA <span class="sc">~</span> Group)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>res.aov2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ANOVA Table (type II tests)
+
+  Effect DFn DFd     F     p p&lt;.05   ges
+1  Group   4 161 1.543 0.192       0.037</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>res.aov3 <span class="ot">&lt;-</span> CST_final <span class="sc">|&gt;</span>  <span class="fu">anova_test</span>(PANAS_NA <span class="sc">~</span> Group)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>res.aov3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ANOVA Table (type II tests)
+
+  Effect DFn DFd     F     p p&lt;.05   ges
+1  Group   4 161 1.303 0.271       0.031</code></pre>
+</div>
+</div>
+</section>
+<section id="geras" class="level4">
+<h4 class="anchored" data-anchor-id="geras">GERAS</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span> </span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Group) <span class="sc">|&gt;</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">shapiro_test</span>(Femininity, Masculinity)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 4
+   Group variable    statistic     p
+   &lt;fct&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;dbl&gt;
+ 1 Males Femininity      0.976 0.621
+ 2 Males Masculinity     0.967 0.367
+ 3 NCF   Femininity      0.982 0.813
+ 4 NCF   Masculinity     0.987 0.942
+ 5 NCL   Femininity      0.964 0.285
+ 6 NCL   Masculinity     0.978 0.673
+ 7 OC    Femininity      0.977 0.786
+ 8 OC    Masculinity     0.959 0.344
+ 9 IUD   Femininity      0.982 0.855
+10 IUD   Masculinity     0.955 0.208</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span> </span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">levene_test</span>(Femininity<span class="sc">~</span>Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 4
+    df1   df2 statistic     p
+  &lt;int&gt; &lt;int&gt;     &lt;dbl&gt; &lt;dbl&gt;
+1     4   161     0.912 0.458</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span> </span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">levene_test</span>(Masculinity<span class="sc">~</span>Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 4
+    df1   df2 statistic     p
+  &lt;int&gt; &lt;int&gt;     &lt;dbl&gt; &lt;dbl&gt;
+1     4   161     0.549 0.700</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span>  <span class="fu">anova_test</span>(Femininity <span class="sc">~</span> Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ANOVA Table (type II tests)
+
+  Effect DFn DFd      F        p p&lt;.05   ges
+1  Group   4 161 12.119 1.23e-08     * 0.231</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span> </span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">emmeans_test</span>(Femininity <span class="sc">~</span> Group,  <span class="at">p.adjust.method =</span> <span class="st">"bonferroni"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 9
+   term  .y.        group1 group2    df statistic         p   p.adj p.adj.signif
+ * &lt;chr&gt; &lt;chr&gt;      &lt;chr&gt;  &lt;chr&gt;  &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;       
+ 1 Group Femininity Males  NCF      161    -5.63    7.96e-8 7.96e-7 ****        
+ 2 Group Femininity Males  NCL      161    -6.37    1.92e-9 1.92e-8 ****        
+ 3 Group Femininity Males  OC       161    -3.52    5.54e-4 5.54e-3 **          
+ 4 Group Femininity Males  IUD      161    -4.22    4.02e-5 4.02e-4 ***         
+ 5 Group Femininity NCF    NCL      161    -0.789   4.31e-1 1   e+0 ns          
+ 6 Group Femininity NCF    OC       161     1.68    9.57e-2 9.57e-1 ns          
+ 7 Group Femininity NCF    IUD      161     1.17    2.43e-1 1   e+0 ns          
+ 8 Group Femininity NCL    OC       161     2.39    1.79e-2 1.79e-1 ns          
+ 9 Group Femininity NCL    IUD      161     1.92    5.68e-2 5.68e-1 ns          
+10 Group Femininity OC     IUD      161    -0.528   5.99e-1 1   e+0 ns          </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span> </span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">tukey_hsd</span>(Femininity <span class="sc">~</span> Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 9
+   term  group1 group2 null.value estimate conf.low conf.high        p.adj
+ * &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;       &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;        &lt;dbl&gt;
+ 1 Group Males  NCF             0   0.650    0.331     0.968  0.00000079  
+ 2 Group Males  NCL             0   0.740    0.420     1.06   0.0000000191
+ 3 Group Males  OC              0   0.442    0.0960    0.788  0.00496     
+ 4 Group Males  IUD             0   0.510    0.177     0.843  0.000384    
+ 5 Group NCF    NCL             0   0.0905  -0.226     0.407  0.933       
+ 6 Group NCF    OC              0  -0.208   -0.550     0.134  0.452       
+ 7 Group NCF    IUD             0  -0.140   -0.469     0.189  0.768       
+ 8 Group NCL    OC              0  -0.298   -0.642     0.0458 0.123       
+ 9 Group NCL    IUD             0  -0.230   -0.561     0.101  0.312       
+10 Group OC     IUD             0   0.0680  -0.288     0.424  0.984       
+# ℹ 1 more variable: p.adj.signif &lt;chr&gt;</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span>  <span class="fu">anova_test</span>(Masculinity <span class="sc">~</span> Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ANOVA Table (type II tests)
+
+  Effect DFn DFd     F     p p&lt;.05   ges
+1  Group   4 161 4.713 0.001     * 0.105</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span> </span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tukey_hsd</span>(</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    Masculinity <span class="sc">~</span> Group</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 9
+   term  group1 group2 null.value estimate conf.low conf.high    p.adj
+ * &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;       &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+ 1 Group Males  NCF             0  -0.508    -0.961   -0.0550 0.0195  
+ 2 Group Males  NCL             0  -0.406    -0.862    0.0507 0.107   
+ 3 Group Males  OC              0  -0.544    -1.04    -0.0518 0.0222  
+ 4 Group Males  IUD             0  -0.690    -1.16    -0.216  0.000847
+ 5 Group NCF    NCL             0   0.103    -0.347    0.553  0.97    
+ 6 Group NCF    OC              0  -0.0359   -0.522    0.451  1       
+ 7 Group NCF    IUD             0  -0.182    -0.650    0.286  0.82    
+ 8 Group NCL    OC              0  -0.139    -0.628    0.351  0.936   
+ 9 Group NCL    IUD             0  -0.285    -0.756    0.186  0.457   
+10 Group OC     IUD             0  -0.146    -0.652    0.360  0.931   
+# ℹ 1 more variable: p.adj.signif &lt;chr&gt;</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span> </span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">emmeans_test</span>(Masculinity <span class="sc">~</span> Group,  <span class="at">p.adjust.method =</span> <span class="st">"bonferroni"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 9
+   term  .y.         group1 group2    df statistic        p   p.adj p.adj.signif
+ * &lt;chr&gt; &lt;chr&gt;       &lt;chr&gt;  &lt;chr&gt;  &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;       
+ 1 Group Masculinity Males  NCF      161     3.09   2.33e-3 2.33e-2 *           
+ 2 Group Masculinity Males  NCL      161     2.45   1.52e-2 1.52e-1 ns          
+ 3 Group Masculinity Males  OC       161     3.05   2.68e-3 2.68e-2 *           
+ 4 Group Masculinity Males  IUD      161     4.02   9.00e-5 9.00e-4 ***         
+ 5 Group Masculinity NCF    NCL      161    -0.629  5.30e-1 1   e+0 ns          
+ 6 Group Masculinity NCF    OC       161     0.204  8.39e-1 1   e+0 ns          
+ 7 Group Masculinity NCF    IUD      161     1.07   2.85e-1 1   e+0 ns          
+ 8 Group Masculinity NCL    OC       161     0.781  4.36e-1 1   e+0 ns          
+ 9 Group Masculinity NCL    IUD      161     1.67   9.73e-2 9.73e-1 ns          
+10 Group Masculinity OC     IUD      161     0.797  4.26e-1 1   e+0 ns          </code></pre>
+</div>
+</div>
+</section>
+<section id="ea-and-tiredness" class="level4">
+<h4 class="anchored" data-anchor-id="ea-and-tiredness">EA and tiredness</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span>  <span class="fu">anova_test</span>(Tiredness_1 <span class="sc">~</span> Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ANOVA Table (type II tests)
+
+  Effect DFn DFd     F    p p&lt;.05   ges
+1  Group   4 161 0.106 0.98       0.003</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span>  <span class="fu">anova_test</span>(EA1 <span class="sc">~</span> Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ANOVA Table (type II tests)
+
+  Effect DFn DFd     F     p p&lt;.05   ges
+1  Group   4 161 1.069 0.373       0.026</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span>  <span class="fu">anova_test</span>(Tiredness_2 <span class="sc">~</span> Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ANOVA Table (type II tests)
+
+  Effect DFn DFd     F    p p&lt;.05   ges
+1  Group   4 161 0.962 0.43       0.023</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span>  <span class="fu">anova_test</span>(EA2 <span class="sc">~</span> Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ANOVA Table (type II tests)
+
+  Effect DFn DFd     F     p p&lt;.05  ges
+1  Group   4 161 1.666 0.161       0.04</code></pre>
+</div>
+</div>
+</section>
+<section id="rm-anova-analysis-of-ea-and-tiredness" class="level4">
+<h4 class="anchored" data-anchor-id="rm-anova-analysis-of-ea-and-tiredness">RM-ANOVA: Analysis of EA and tiredness</h4>
+<p>Filtrate just necessary data table</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>RM_data <span class="ot">&lt;-</span> CST_final <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(Subject, Group, EA1, EA2, Tiredness_1, Tiredness_2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>RM_data_long <span class="ot">&lt;-</span> RM_data <span class="sc">%&gt;%</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gather</span>(<span class="at">key =</span> <span class="st">"time"</span>, <span class="at">value =</span> <span class="st">"score"</span>, EA1, EA2) <span class="sc">|&gt;</span> </span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">convert_as_factor</span>(Subject, Group, time) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Assumptions</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>bxp <span class="ot">&lt;-</span> <span class="fu">ggboxplot</span>(RM_data_long, <span class="at">x =</span> <span class="st">"time"</span>, <span class="at">y =</span> <span class="st">"score"</span>, <span class="at">add =</span> <span class="st">"point"</span>)</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>bxp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Demographic_table_calculations_files/figure-html/unnamed-chunk-36-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>RM_data_long <span class="sc">%&gt;%</span></span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(time) <span class="sc">%&gt;%</span></span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">identify_outliers</span>(score)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] time        Subject     Group       Tiredness_1 Tiredness_2 score      
+[7] is.outlier  is.extreme 
+&lt;0 rows&gt; (or 0-length row.names)</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>RM_data_long <span class="sc">%&gt;%</span></span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(time) <span class="sc">%&gt;%</span></span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">shapiro_test</span>(score)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 4
+  time  variable statistic          p
+  &lt;fct&gt; &lt;chr&gt;        &lt;dbl&gt;      &lt;dbl&gt;
+1 EA1   score        0.942 0.00000252
+2 EA2   score        0.969 0.000826  </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggqqplot</span>(RM_data_long, <span class="st">"score"</span>, <span class="at">facet.by =</span> <span class="st">"time"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Demographic_table_calculations_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>res.aov5 <span class="ot">&lt;-</span> <span class="fu">anova_test</span>(</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> RM_data_long, <span class="at">dv =</span> score, <span class="at">wid =</span> Subject,</span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">between =</span> Group, <span class="at">within =</span> time</span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a><span class="fu">get_anova_table</span>(res.aov5)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ANOVA Table (type III tests)
+
+      Effect DFn DFd      F        p p&lt;.05   ges
+1      Group   4 161  2.000 9.70e-02       0.031
+2       time   1 161 41.107 1.53e-09     * 0.085
+3 Group:time   4 161  0.371 8.29e-01       0.003</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>RM_data_long2 <span class="ot">&lt;-</span> RM_data <span class="sc">%&gt;%</span></span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gather</span>(<span class="at">key =</span> <span class="st">"time"</span>, <span class="at">value =</span> <span class="st">"score"</span>, Tiredness_1, Tiredness_2) <span class="sc">|&gt;</span> </span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">convert_as_factor</span>(Subject, Group, time)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Assumptions</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>bxp <span class="ot">&lt;-</span> <span class="fu">ggboxplot</span>(RM_data_long2, <span class="at">x =</span> <span class="st">"time"</span>, <span class="at">y =</span> <span class="st">"score"</span>, <span class="at">add =</span> <span class="st">"point"</span>)</span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>bxp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Demographic_table_calculations_files/figure-html/unnamed-chunk-42-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>RM_data_long2 <span class="sc">%&gt;%</span></span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(time) <span class="sc">%&gt;%</span></span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">identify_outliers</span>(score)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] time       Subject    Group      EA1        EA2        score      is.outlier
+[8] is.extreme
+&lt;0 rows&gt; (or 0-length row.names)</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>RM_data_long2 <span class="sc">%&gt;%</span></span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(time) <span class="sc">%&gt;%</span></span>
+<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">shapiro_test</span>(score)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 4
+  time        variable statistic            p
+  &lt;fct&gt;       &lt;chr&gt;        &lt;dbl&gt;        &lt;dbl&gt;
+1 Tiredness_1 score        0.917 0.0000000417
+2 Tiredness_2 score        0.980 0.0174      </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggqqplot</span>(RM_data_long2, <span class="st">"score"</span>, <span class="at">facet.by =</span> <span class="st">"time"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Demographic_table_calculations_files/figure-html/unnamed-chunk-45-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>res.aov6 <span class="ot">&lt;-</span> <span class="fu">anova_test</span>(</span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> RM_data_long2, <span class="at">dv =</span> score, <span class="at">wid =</span> Subject,</span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">between =</span> Group, <span class="at">within =</span> time</span>
+<span id="cb76-4"><a href="#cb76-4" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb76-5"><a href="#cb76-5" aria-hidden="true" tabindex="-1"></a><span class="fu">get_anova_table</span>(res.aov6)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ANOVA Table (type III tests)
+
+      Effect DFn DFd       F        p p&lt;.05   ges
+1      Group   4 161   0.342 8.49e-01       0.006
+2       time   1 161 160.939 5.24e-26     * 0.241
+3 Group:time   4 161   0.868 4.85e-01       0.007</code></pre>
+</div>
+</div>
+</section>
+<section id="sex-hormones" class="level4">
+<h4 class="anchored" data-anchor-id="sex-hormones">Sex hormones</h4>
+<p>Testosterone</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span> </span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Group) <span class="sc">|&gt;</span></span>
+<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">shapiro_test</span>(Tes, E2, P4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 13 × 4
+   Group variable statistic        p
+   &lt;fct&gt; &lt;chr&gt;        &lt;dbl&gt;    &lt;dbl&gt;
+ 1 Males Tes          0.969 0.412   
+ 2 NCF   E2           0.971 0.428   
+ 3 NCF   P4           0.876 0.000690
+ 4 NCF   Tes          0.954 0.130   
+ 5 NCL   E2           0.969 0.396   
+ 6 NCL   P4           0.927 0.0200  
+ 7 NCL   Tes          0.978 0.663   
+ 8 OC    E2           0.917 0.0330  
+ 9 OC    P4           0.908 0.0210  
+10 OC    Tes          0.972 0.660   
+11 IUD   E2           0.949 0.144   
+12 IUD   P4           0.831 0.000203
+13 IUD   Tes          0.980 0.826   </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span> </span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">levene_test</span>(Tes<span class="sc">~</span>Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 4
+    df1   df2 statistic        p
+  &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+1     4   161      16.9 1.42e-11</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a>wlch_anov <span class="ot">&lt;-</span> CST_final <span class="sc">|&gt;</span>  <span class="fu">welch_anova_test</span>(Tes <span class="sc">~</span> Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">%&gt;%</span></span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">games_howell_test</span>(</span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">formula =</span> Tes <span class="sc">~</span> Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 8
+   .y.   group1 group2 estimate conf.low conf.high    p.adj p.adj.signif
+ * &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;       
+ 1 Tes   Males  NCF     -158.    -192.     -125.   8.82e-13 ****        
+ 2 Tes   Males  NCL     -156.    -189.     -122.   1.14e-12 ****        
+ 3 Tes   Males  OC      -176.    -209.     -144.   4.76e-13 ****        
+ 4 Tes   Males  IUD     -153.    -187.     -118.   0        ****        
+ 5 Tes   NCF    NCL        2.24   -14.0      18.5  9.95e- 1 ns          
+ 6 Tes   NCF    OC       -18.3    -33.4      -3.17 1   e- 2 **          
+ 7 Tes   NCF    IUD        5.60   -12.2      23.5  9.03e- 1 ns          
+ 8 Tes   NCL    OC       -20.5    -35.1      -6.01 2   e- 3 **          
+ 9 Tes   NCL    IUD        3.37   -14.0      20.7  9.82e- 1 ns          
+10 Tes   OC     IUD       23.9      7.54     40.3  1   e- 3 ***         </code></pre>
+</div>
+</div>
+<p>Estradiol</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a>women_data <span class="ot">&lt;-</span> CST_final <span class="sc">|&gt;</span> <span class="fu">filter</span>(Sex <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">log_p4 =</span> <span class="fu">log</span>(P4))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>women_data <span class="sc">|&gt;</span> </span>
+<span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">levene_test</span>(E2 <span class="sc">~</span> Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 4
+    df1   df2 statistic     p
+  &lt;int&gt; &lt;int&gt;     &lt;dbl&gt; &lt;dbl&gt;
+1     3   127      1.79 0.152</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>women_data <span class="sc">|&gt;</span>  <span class="fu">anova_test</span>(E2 <span class="sc">~</span> Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ANOVA Table (type II tests)
+
+  Effect DFn DFd     F     p p&lt;.05   ges
+1  Group   3 127 0.905 0.441       0.021</code></pre>
+</div>
+</div>
+<p>progesterone</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a>women_data <span class="sc">|&gt;</span> </span>
+<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Group) <span class="sc">|&gt;</span> </span>
+<span id="cb90-3"><a href="#cb90-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">shapiro_test</span>(log_p4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 4
+  Group variable statistic      p
+  &lt;fct&gt; &lt;chr&gt;        &lt;dbl&gt;  &lt;dbl&gt;
+1 NCF   log_p4       0.975 0.563 
+2 NCL   log_p4       0.945 0.0709
+3 OC    log_p4       0.928 0.0612
+4 IUD   log_p4       0.981 0.830 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb92"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a>women_data <span class="sc">|&gt;</span> </span>
+<span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">levene_test</span>(log_p4 <span class="sc">~</span> Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 4
+    df1   df2 statistic     p
+  &lt;int&gt; &lt;int&gt;     &lt;dbl&gt; &lt;dbl&gt;
+1     3   127     0.780 0.507</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a>women_data <span class="sc">|&gt;</span>  <span class="fu">anova_test</span>(log_p4 <span class="sc">~</span> Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ANOVA Table (type II tests)
+
+  Effect DFn DFd      F        p p&lt;.05  ges
+1  Group   3 127 14.848 2.41e-08     * 0.26</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a>women_data <span class="sc">|&gt;</span> </span>
+<span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tukey_hsd</span>(log_p4 <span class="sc">~</span> Group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 9
+  term  group1 group2 null.value estimate conf.low conf.high        p.adj
+* &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;       &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;        &lt;dbl&gt;
+1 Group NCF    NCL             0    1.04     0.604     1.48  0.0000000421
+2 Group NCF    OC              0    0.272   -0.200     0.744 0.441       
+3 Group NCF    IUD             0    0.162   -0.292     0.616 0.789       
+4 Group NCL    OC              0   -0.769   -1.24     -0.294 0.00027     
+5 Group NCL    IUD             0   -0.879   -1.34     -0.422 0.0000107   
+6 Group OC     IUD             0   -0.110   -0.600     0.381 0.938       
+# ℹ 1 more variable: p.adj.signif &lt;chr&gt;</code></pre>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="vidurkiai-pritrūkusių-skaičiukų" class="level2">
+<h2 class="anchored" data-anchor-id="vidurkiai-pritrūkusių-skaičiukų">Vidurkiai pritrūkusių skaičiukų</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb98"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>CST_final <span class="sc">|&gt;</span> </span>
+<span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Group) <span class="sc">|&gt;</span> </span>
+<span id="cb98-3"><a href="#cb98-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">get_summary_stats</span>(PANAS_PA, PANAS_NA, P4,Tes, <span class="at">type =</span> <span class="st">"mean_sd"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 19 × 5
+   Group variable     n  mean     sd
+   &lt;fct&gt; &lt;fct&gt;    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
+ 1 Males PANAS_PA    35  35.5   4.79
+ 2 Males PANAS_NA    35  23.0   7.11
+ 3 Males Tes         35 234.   65.3 
+ 4 NCF   PANAS_PA    37  38.0   5.62
+ 5 NCF   PANAS_NA    37  26.0   7.12
+ 6 NCF   P4          37  74.3  47.8 
+ 7 NCF   Tes         37  75.6  25.8 
+ 8 NCL   PANAS_PA    36  36.7   6.24
+ 9 NCL   PANAS_NA    36  25.5   8.25
+10 NCL   P4          36 218.  137.  
+11 NCL   Tes         36  77.8  23.7 
+12 OC    PANAS_PA    27  34.8   5.73
+13 OC    PANAS_NA    27  23.7   6.52
+14 OC    P4          27 100.   63.3 
+15 OC    Tes         27  57.3  17.3 
+16 IUD   PANAS_PA    31  36.8   6.24
+17 IUD   PANAS_NA    31  25.9   5.56
+18 IUD   P4          31 100.   85.4 
+19 IUD   Tes         31  81.2  26.4 </code></pre>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

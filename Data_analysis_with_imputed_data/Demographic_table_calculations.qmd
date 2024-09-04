@@ -1,0 +1,378 @@
+---
+title: "Demographic_table_results"
+format: html
+editor: visual
+---
+
+### Libraries
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+library(rstatix)
+library(gtsummary)
+library(lmtest)
+library(ggpubr)
+library(car)
+library(MASS)
+library(nortest)
+```
+
+```{r}
+#| echo: false
+combined_full <- read_csv("teisingas_imputed_complete_data_plusNCL.csv")
+```
+
+```{r}
+#| echo: false
+CST_final <- combined_full |> mutate(accu = (Orthogon_CorrectSimple + Orthogon_CorrectJoint + Orthogon_CorrectEmbed + Oblique_CorrectSimple + Oblique_CorrectJoint + Oblique_CorrectEmbed)/6)
+```
+
+```{r}
+#| echo: false
+CST_final <- CST_final |>  
+                          mutate(Group = as.factor(Group),
+                                STEM = as.factor(STEM), 
+                                Sex =  as.factor(Sex))
+```
+
+```{r}
+#| echo: false
+# Define the desired order of factor levels
+desired_order <- c("Men", "NCF", "NCL", "OC", "IUD" )
+
+# Reorder the levels of the 'Group' factor variable
+CST_final$Group <- fct_relevel(CST_final$Group, desired_order)
+
+```
+
+```{r}
+#| echo: false
+CST_final <- CST_final |> 
+  mutate(Group = fct_recode(Group, "Males" = "Men"))
+```
+
+## 1. Main analysis
+
+### 1. 1 Demographic table
+
+```{r}
+Demographic_data <- CST_final |> dplyr::select(Age:Tes,-Sex)
+
+demographic_summary_1 <- Demographic_data |>
+  tbl_summary(
+    by = Group,
+    missing = "no",
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})"
+    )
+  ) |>
+  add_p(
+    test = all_continuous() ~ "aov",
+    pvalue_fun = function(x) style_pvalue(x, digits = 2)
+  )
+
+demographic_summary_1
+```
+
+### Parametricity
+
+```{r}
+CST_final |> 
+  group_by(Group) |>
+  shapiro_test(Age, PANAS_PA, PANAS_NA, EA1, EA2, Tiredness_1, Tiredness_2, Femininity, Masculinity, P4, E2, Tes)
+```
+
+```{r}
+CST_final |> 
+  group_by(Group) |>
+  shapiro_test(Age, PANAS_PA, PANAS_NA, EA1, EA2, Tiredness_1, Tiredness_2, Femininity, Masculinity, P4, E2, Tes)
+```
+
+```{r}
+
+```
+
+#### Age
+
+```{r}
+CST_final |> 
+  group_by(Group) |>
+  shapiro_test(Age)
+```
+
+```{r}
+CST_final |> 
+  levene_test(Age~Group)
+```
+
+```{r}
+res.aov <- CST_final |>  anova_test(Age ~ Group)
+res.aov
+```
+
+```{r}
+CST_final |> tukey_hsd(Age ~ Group)
+```
+
+#### STEM
+
+```{r}
+STEM <- table(CST_final$STEM, CST_final$Group)
+```
+
+```{r}
+chisq_test(STEM)
+```
+
+```{r}
+pairwise_chisq_gof_test(STEM,p.adjust.method = "fdr")
+```
+
+#### PANAS
+
+```{r}
+CST_final |> 
+  group_by(Group) |>
+  shapiro_test(PANAS_PA, PANAS_NA)
+```
+
+```{r}
+CST_final |> 
+  levene_test(PANAS_PA~Group)
+
+CST_final |> 
+  levene_test(PANAS_NA~Group)
+```
+
+```{r}
+res.aov2 <- CST_final |>  anova_test(PANAS_PA ~ Group)
+res.aov2
+```
+
+```{r}
+res.aov3 <- CST_final |>  anova_test(PANAS_NA ~ Group)
+res.aov3
+```
+
+#### GERAS
+
+```{r}
+CST_final |> 
+  group_by(Group) |>
+  shapiro_test(Femininity, Masculinity)
+```
+
+```{r}
+CST_final |> 
+  levene_test(Femininity~Group)
+
+CST_final |> 
+  levene_test(Masculinity~Group)
+```
+
+```{r}
+CST_final |>  anova_test(Femininity ~ Group)
+
+```
+
+```{r}
+CST_final |> 
+ emmeans_test(Femininity ~ Group,  p.adjust.method = "bonferroni")
+```
+
+```{r}
+CST_final |> 
+ tukey_hsd(Femininity ~ Group)
+```
+
+```{r}
+CST_final |>  anova_test(Masculinity ~ Group)
+```
+
+```{r}
+CST_final |> 
+  tukey_hsd(
+    Masculinity ~ Group
+    )
+```
+
+```{r}
+CST_final |> 
+ emmeans_test(Masculinity ~ Group,  p.adjust.method = "bonferroni")
+```
+
+#### EA and tiredness
+
+```{r}
+CST_final |>  anova_test(Tiredness_1 ~ Group)
+```
+
+```{r}
+CST_final |>  anova_test(EA1 ~ Group)
+```
+
+```{r}
+CST_final |>  anova_test(Tiredness_2 ~ Group)
+```
+
+```{r}
+CST_final |>  anova_test(EA2 ~ Group)
+```
+
+#### RM-ANOVA: Analysis of EA and tiredness
+
+Filtrate just necessary data table
+
+```{r}
+RM_data <- CST_final |> dplyr::select(Subject, Group, EA1, EA2, Tiredness_1, Tiredness_2)
+```
+
+```{r}
+RM_data_long <- RM_data %>%
+  gather(key = "time", value = "score", EA1, EA2) |> 
+  convert_as_factor(Subject, Group, time) 
+
+```
+
+Assumptions
+
+```{r}
+bxp <- ggboxplot(RM_data_long, x = "time", y = "score", add = "point")
+bxp
+```
+
+```{r}
+RM_data_long %>%
+  group_by(time) %>%
+  identify_outliers(score)
+```
+
+```{r}
+RM_data_long %>%
+  group_by(time) %>%
+  shapiro_test(score)
+```
+
+```{r}
+ggqqplot(RM_data_long, "score", facet.by = "time")
+```
+
+```{r}
+res.aov5 <- anova_test(
+  data = RM_data_long, dv = score, wid = Subject,
+  between = Group, within = time
+  )
+get_anova_table(res.aov5)
+```
+
+```{r}
+RM_data_long2 <- RM_data %>%
+  gather(key = "time", value = "score", Tiredness_1, Tiredness_2) |> 
+  convert_as_factor(Subject, Group, time)
+
+```
+
+Assumptions
+
+```{r}
+bxp <- ggboxplot(RM_data_long2, x = "time", y = "score", add = "point")
+bxp
+```
+
+```{r}
+RM_data_long2 %>%
+  group_by(time) %>%
+  identify_outliers(score)
+```
+
+```{r}
+RM_data_long2 %>%
+  group_by(time) %>%
+  shapiro_test(score)
+```
+
+```{r}
+ggqqplot(RM_data_long2, "score", facet.by = "time")
+```
+
+```{r}
+res.aov6 <- anova_test(
+  data = RM_data_long2, dv = score, wid = Subject,
+  between = Group, within = time
+  )
+get_anova_table(res.aov6)
+```
+
+#### Sex hormones
+
+Testosterone
+
+```{r}
+CST_final |> 
+  group_by(Group) |>
+  shapiro_test(Tes, E2, P4)
+```
+
+```{r}
+CST_final |> 
+  levene_test(Tes~Group)
+```
+
+```{r}
+wlch_anov <- CST_final |>  welch_anova_test(Tes ~ Group)
+```
+
+```{r}
+CST_final %>%
+  games_howell_test(
+    formula = Tes ~ Group)
+```
+
+Estradiol
+
+```{r}
+women_data <- CST_final |> filter(Sex == 1) |> mutate(log_p4 = log(P4))
+```
+
+```{r}
+women_data |> 
+  levene_test(E2 ~ Group)
+```
+
+```{r}
+women_data |>  anova_test(E2 ~ Group)
+```
+
+progesterone
+
+```{r}
+women_data |> 
+  group_by(Group) |> 
+  shapiro_test(log_p4)
+```
+
+```{r}
+women_data |> 
+  levene_test(log_p4 ~ Group)
+```
+
+```{r}
+women_data |>  anova_test(log_p4 ~ Group)
+```
+
+```{r}
+women_data |> 
+  tukey_hsd(log_p4 ~ Group)
+```
+
+
+
+## Vidurkiai pritrūkusių skaičiukų
+
+```{r}
+CST_final |> 
+  group_by(Group) |> 
+  get_summary_stats(PANAS_PA, PANAS_NA, P4,Tes, type = "mean_sd")
+```

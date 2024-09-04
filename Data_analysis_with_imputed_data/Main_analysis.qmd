@@ -20,11 +20,13 @@ library(ggpubr)
 library(car)
 library(MASS)
 library(nortest)
+library(broom)
+library(readxl)
 ```
 
 ```{r}
 #| echo: false
-combined_full <- read_csv("C:/Users/Rokas/Desktop/Mantes dokumentai/Dok. reikalingi failai/Skerspjūvio analizė/final_final_analysis/Full_CST_analysis/combined_full.csv")
+combined_full <- read_csv("teisingas_imputed_complete_data_plusNCL.csv")
 ```
 
 ```{r}
@@ -61,7 +63,9 @@ CST_full_parameters <- CST_full_parameters |>
 ### 1. 1 Demographic table
 
 ```{r}
-Demographic_data <- CST_full_parameters |> dplyr::select(Age:Tes,-Sex, -anxiety)
+#| warning: false
+#| message: false
+Demographic_data <- CST_full_parameters |> dplyr::select(Age:Tes,-Sex)
 
 demographic_summary_1 <- Demographic_data |>
   tbl_summary(
@@ -99,18 +103,39 @@ CST_full_parameters |>
   shapiro_test(accu)
 ```
 
-Violated just in males group, probably due to sealing effect. In men group n \> 30, still can use parametric statistic (central limit theorem).
-
-**Homoscedasticity test**
-
 ```{r}
-model <- lm(accu ~ Group + STEM, data = CST_full_parameters)
-bptest(model)
+ggqqplot(CST_full_parameters, "accu", facet.by = "Group")
 ```
 
-Homoscedasticity assumption is not violated p \> 0.05
+```{r}
+# Fit the model, the covariate goes first
+model <- lm(accu ~ Group + Age + STEM, data = CST_full_parameters)
+```
 
-**Conclusion:** Assumptions are not violated, we can use parametric statistic.
+```{r}
+model.metrics <- augment(model) |> 
+  dplyr::select(-.hat, -.sigma, -.fitted)
+```
+
+```{r}
+# Assess normality of residuals using shapiro wilk test
+shapiro_test(model.metrics$.resid)
+
+```
+
+```{r}
+ggqqplot(model.metrics, ".resid")
+```
+
+Tested in two ways. With simple Shapiro test on original data and lm model residuals Shapiro test. It looks like selling effect is present, therefore we cannot see normal distribution, however in men N \> 30, which let us use central limit theorem.
+
+**Homogeneity of variance**
+
+```{r}
+model.metrics %>% levene_test(.resid ~ Group)
+```
+
+The assumption is not violated. Over all, the data is fit to use parametric statistics.
 
 #### ANOVA
 
@@ -124,9 +149,8 @@ get_anova_table(aov_1)
 
 ```{r}
 pwc <- CST_full_parameters |> 
-  emmeans_test(
-    accu ~ Group, covariate = Age,
-    p.adjust.method = "bonferroni"
+  tukey_hsd(
+    accu ~ Group, covariate = Age
     )
 pwc
 ```
@@ -165,6 +189,52 @@ Anova_result <- ggplot(CST_full_parameters, aes(Group, accu)) +
 Anova_result
 ```
 
+```{r}
+#ggsave("figures/Anova_result.png", Anova_result, width = 6, height = 4.5)
+```
+
+### Aditional OC analysis
+
+```{r}
+cycle_info <- read_excel("Info_hc.xlsx") 
+```
+
+```{r}
+cycle_info <- cycle_info |>  mutate(Group = as.factor(Group),
+                                Cycle_day = as.numeric(Cycle_day))
+```
+
+```{r}
+#| output: false
+CST_data_plus <- CST_full_parameters |> left_join(cycle_info, by = "Subject")
+```
+
+```{r}
+just_OC <- CST_data_plus |> 
+  filter(Group.x == "OC") |> 
+  group_by(E_conc) |> 
+  drop_na(E_conc) |> 
+  mutate(E_conc = as.factor(E_conc))
+```
+
+```{r}
+just_OC |> 
+  get_summary_stats(accu, type = "mean_sd")
+```
+
+```{r}
+t_test_result <- t.test(accu ~ E_conc, data = just_OC)
+```
+
+```{r}
+t_test_result
+```
+
+```{r}
+res <- wilcox.test(accu ~ E_conc, data = just_OC, exact = FALSE)
+res
+```
+
 ### 1.3. Linear regression model
 
 ### 1.3.1 Women
@@ -183,7 +253,7 @@ dummy_df <- as.data.frame(dummy_matrix)
 women_data <- cbind(women_data, dummy_df)
 
 
-women_data <- women_data[, -26] 
+women_data <- women_data[, -24] 
 ```
 
 ```{r}
@@ -210,7 +280,19 @@ women_data <- women_data |>
 #### Running first LM model with all the variables
 
 ```{r}
-women_lm_model <- lm(accu~ OC + IUD + NCL + Age + STEM + PANAS_PA + PANAS_NA + EA1 + EA2 + Tiredness_1 + Tiredness_2 + Femininity + Masculinity + P4 + E2 +Tes, data = women_data)
+# Separate numeric and factor variables
+numeric_vars <- sapply(women_data, is.numeric)
+factor_vars <- sapply(women_data, is.factor)
+
+# Standardize numeric variables
+scaled_numeric_data <- as.data.frame(scale(women_data[, numeric_vars]))
+
+# Combine standardized numeric variables with original factor variables
+final_data <- cbind(scaled_numeric_data, women_data[, factor_vars])
+```
+
+```{r}
+women_lm_model <- lm(accu~ OC + IUD + NCL + Age + STEM + PANAS_PA + PANAS_NA + EA1 + EA2 + Tiredness_1 + Tiredness_2 + Femininity + Masculinity + P4 + E2 +Tes, data = final_data)
 ```
 
 ```{r}
@@ -236,7 +318,7 @@ As model suggest that IUD group differ from all other females, I would designate
 #### Final model
 
 ```{r}
-women_final <- lm(accu ~ OC + NCF + NCL + EA2 + Femininity + Masculinity, data  = women_data)
+women_final <- lm(accu ~ OC + NCF + NCL + Age + EA2 + Femininity + Masculinity + Tes, data  = final_data)
 ```
 
 ```{r}
@@ -285,7 +367,7 @@ Independence of errors assumption is not violated p \> 0.05.
 #### Polynomial regression analysis for testosterone
 
 ```{r}
-quadratic_model_women <- lm(accu  ~ poly(Tes, 2, raw = TRUE), data = women_data)
+quadratic_model_women <- lm(accu  ~ poly(Tes, 2, raw = TRUE), data = final_data)
 summary(quadratic_model_women)
 ```
 
@@ -300,14 +382,30 @@ No quadratic effect of testosterone.
 men_data <- CST_full_parameters |> filter(Sex == 2) 
 ```
 
+```{r}
+# Separate numeric and factor variables
+numeric_vars_men <- sapply(men_data, is.numeric)
+factor_vars_men <- sapply(men_data, is.factor)
+
+# Standardize numeric variables
+scaled_numeric_data_men <- as.data.frame(scale(men_data[, numeric_vars_men]))
+
+# Combine standardized numeric variables with original factor variables
+final_data_men <- cbind(scaled_numeric_data_men, men_data[, factor_vars_men])
+```
+
 #### Running first LM model with all the variables
 
 ```{r}
-men_lm_model <- lm(accu~ Age + STEM + PANAS_PA + PANAS_NA + EA1 + EA2 + Tiredness_1 + Tiredness_2 + Femininity + Masculinity +Tes, data = men_data)
+men_lm_model <- lm(accu~ Age + STEM + PANAS_PA + PANAS_NA + EA1 + EA2 + Tiredness_1 + Tiredness_2 + Femininity + Masculinity +Tes, data = final_data_men)
 ```
 
 ```{r}
 summary(men_lm_model)
+```
+
+```{r}
+vif(men_lm_model)
 ```
 
 #### AIC procedure
@@ -319,7 +417,7 @@ stepAIC(men_lm_model, direction = "backward")
 #### Final model
 
 ```{r}
-men_final <- lm(accu ~ EA1, data = men_data)
+men_final <- lm(accu ~ EA1, data = final_data_men)
 ```
 
 ```{r}
@@ -365,7 +463,7 @@ Probably 17, 24, 30 are "outliers" which are effecting homoscedasticity . Homosc
 durbinWatsonTest(men_final)
 ```
 
-The independence of error assumption is violated.
+The independence of error assumption is not violated.
 
 **Conclusion:** Some assumptions are violated therefore the model should be interpreted with cautious.
 
@@ -374,7 +472,7 @@ men_lm <- ggplot(men_data, aes(x = EA1, y = accu)) +
   geom_point(size = 3, alpha = 0.7) +  # Adjusting point 
   geom_smooth(method = "lm", se = FALSE, color = "#0072B2", linetype = "dashed", size = 1.5) +  # Adjusting smooth line aesthetics
   theme_minimal() +
-  labs(x = "EA1", y = "Accuracy, %", title = "y = 75.10 + 3.18X, p = 0.019 ") +  # Adding axis labels and title
+  labs(x = "EA1", y = "Accuracy, %") +  # Adding axis labels and title
   theme(plot.title = element_text(size = 14, face = "bold"),  # Adjusting title font size and style
         axis.text = element_text(size = 14),  # Adjusting axis text size
         axis.title = element_text(size = 18, face = "bold"))  # Adjusting axis title size and style
@@ -390,7 +488,7 @@ ggsave("figures/men_lm.png", men_lm, width = 6, height = 4.5)
 #### Polynomial regression analysis for testosterone
 
 ```{r}
-quadratic_model_men <- lm(accu ~ poly(Tes, 2, raw = TRUE), data = men_data)
+quadratic_model_men <- lm(accu ~ poly(Tes, 2, raw = TRUE), data = final_data_men)
 ```
 
 ```{r}
@@ -404,13 +502,20 @@ No quadratic effect of testosterone
 *Output of mediation analysis is not accessible as PROCESS v4.3 functions available as script, not a R package.*
 
 ```{r}
+CST_full_parameters <- CST_full_parameters |>  
+                          mutate(Group = as.numeric(Group),
+                                STEM = as.numeric(STEM), 
+                                Sex =  as.numeric(Sex))
+```
+
+```{r}
 #| eval: false
-process (data = CST_full_parameters, y = "accu", x = "Sex", m ="EA2", model = 4, effsize =1, total =1, stand =1, cov = "STEM", boot = 10000 , seed = 654321)
+process (data = CST_full_parameters, y = "accu", x = "Sex", m ="EA2", model = 4, effsize =1, total =1, stand =1, cov = c("Group","Age","STEM"), boot = 10000 , seed = 654321)
 ```
 
 Percentage of the sex difference explained by EA2
 
 ```{r}
-Proc_EA <- (0.1400*100)/0.6201
+Proc_EA <- (0.1801*100)/0.9632
 Proc_EA
 ```
