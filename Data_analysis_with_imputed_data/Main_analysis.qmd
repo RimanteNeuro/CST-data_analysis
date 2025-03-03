@@ -127,7 +127,7 @@ shapiro_test(model.metrics$.resid)
 ggqqplot(model.metrics, ".resid")
 ```
 
-Tested in two ways. With simple Shapiro test on original data and lm model residuals Shapiro test. It looks like selling effect is present, therefore we cannot see normal distribution, however in men N \> 30, which let us use central limit theorem.
+Tested in two ways. With simple Shapiro test on original data and lm model residuals Shapiro test. It looks like celling effect is present, therefore we cannot see normal distribution, however in men N \> 30, which let us use central limit theorem.
 
 **Homogeneity of variance**
 
@@ -479,9 +479,49 @@ men_lm <- ggplot(men_data, aes(x = EA1, y = accu)) +
 men_lm
 ```
 
+#### Additional boostrap analysis
+
 ```{r}
 
-ggsave("figures/men_lm.png", men_lm, width = 6, height = 4.5)
+corr_men <- men_data |> dplyr::select(accu, Age, STEM, PANAS_PA, PANAS_NA, EA1, EA2, Tiredness_1, Tiredness_2, Femininity, Masculinity, Tes) |> mutate(STEM = as.numeric(STEM)) 
+```
+
+```{r}
+# Load necessary library
+library(boot)
+
+# Function to compute correlation of "accu" with all other variables
+bootstrap_corr <- function(data, indices) {
+  boot_sample <- data[indices, ]  # Resample the data
+  cor_values <- cor(boot_sample$accu, boot_sample[, -1], use = "pairwise.complete.obs")  # Correlation with accu
+  return(cor_values)  # Returns vector of correlations
+}
+
+# Perform bootstrapping with 1000 resamples
+set.seed(123)  # Ensure reproducibility
+boot_res <- boot(data = corr_men, statistic = bootstrap_corr, R = 10000)
+
+# Compute 95% confidence intervals for each variable
+boot_ci_list <- lapply(1:ncol(corr_men[-1]), function(i) {
+  boot.ci(boot_res, type = "perc", index = i)
+})
+
+# Extract results into a readable format
+ci_results <- data.frame(
+  Variable = colnames(corr_men)[-1],  # All variables except "accu"
+  Correlation = colMeans(boot_res$t),  # Mean of bootstrap correlations
+  Lower_CI = sapply(boot_ci_list, function(ci) ci$percent[4]),  # 2.5% percentile
+  Upper_CI = sapply(boot_ci_list, function(ci) ci$percent[5])   # 97.5% percentile
+)
+
+# Print final table of correlations with confidence intervals
+print(ci_results)
+
+```
+
+```{r}
+
+#ggsave("figures/men_lm.png", men_lm, width = 6, height = 4.5)
 
 ```
 
